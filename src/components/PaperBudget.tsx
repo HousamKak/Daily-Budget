@@ -657,7 +657,6 @@ function PlannerPanel({
   const [itemsExpanded, setItemsExpanded] = useState<boolean>(true);
   const [showAllItemsModal, setShowAllItemsModal] = useState<boolean>(false);
 
-  const weekOptions = Array.from({ length: weekCount }, (_, i) => i);
   const labelForWeek = (i: number) => {
     const off = monStartOffset(year, month);
     const startDay = i * 7 - off + 1; // may be <=0
@@ -667,7 +666,6 @@ function PlannerPanel({
   };
 
   const thisWeekItems = plans.filter((p) => p.weekIndex === weekIndex);
-  const nextWeekItems = plans.filter((p) => p.weekIndex === Math.min(weekIndex + 1, weekCount - 1));
 
   // Financial summary helpers
   function getWeekDateRange(wkIndex: number) {
