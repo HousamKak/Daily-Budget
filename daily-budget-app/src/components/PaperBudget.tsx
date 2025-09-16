@@ -440,7 +440,7 @@ export default function PaperBudget() {
                   <div key={`blank-${i}`} />
                 ))}
                 {days.map((d) => (
-                  <HoverCard key={d}>
+                  <HoverCard key={d} openDelay={200} closeDelay={200}>
                     <HoverCardTrigger asChild>
                       <button
                         className={`group relative aspect-square w-full rounded-2xl border border-amber-300/70 bg-[radial-gradient(circle_at_20%_0%,#fff,rgba(255,255,255,0.92))] shadow-sm hover:shadow-md transition-all ${
@@ -465,13 +465,19 @@ export default function PaperBudget() {
                               {d}
                             </span>
                           </div>
-                          <div className="mt-auto w-full text-left">
-                            <div className="text-[10px] sm:text-[11px] opacity-60 leading-none">spent</div>
-                            <div className="text-xs sm:text-sm font-bold -mt-0.5">${spentOn(d).toFixed(2)}</div>
+                          <div className="mt-auto w-full text-left space-y-0.5">
+                            <div>
+                              <div className="text-[8px] sm:text-[9px] opacity-60 leading-none">spent</div>
+                              <div className="text-[9px] sm:text-[10px] font-bold mt-0.5 text-red-600">${spentOn(d).toFixed(2)}</div>
+                            </div>
+                            <div>
+                              <div className="text-[8px] sm:text-[9px] opacity-60 leading-none">rem</div>
+                              <div className="text-[9px] sm:text-[10px] font-bold mt-0.5 text-emerald-600">${leftAfter(d).toFixed(2)}</div>
+                            </div>
                           </div>
                         </div>
-                        <div className="absolute right-2 bottom-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Plus className="w-4 h-4 text-stone-600" />
+                        <div className="absolute right-1.5 bottom-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Plus className="w-3.5 h-3.5 text-stone-600" />
                         </div>
                       </button>
                     </HoverCardTrigger>
@@ -489,8 +495,21 @@ export default function PaperBudget() {
                             left after: <span className="font-bold text-stone-800">${leftAfter(d).toFixed(2)}</span>
                           </div>
                         </div>
-                        <div className="text-sm">
-                          Spent today: <span className="font-bold">${spentOn(d).toFixed(2)}</span>
+
+                        {/* Budget Summary */}
+                        <div className="grid grid-cols-3 gap-2 text-xs bg-amber-50/50 rounded-lg p-2 border border-amber-200/30">
+                          <div className="text-center">
+                            <div className="opacity-60">Budget</div>
+                            <div className="font-bold text-stone-800">${budget.toFixed(2)}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="opacity-60">Spent</div>
+                            <div className="font-bold text-red-600">${spentOn(d).toFixed(2)}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="opacity-60">Remaining</div>
+                            <div className="font-bold text-emerald-600">${leftAfter(d).toFixed(2)}</div>
+                          </div>
                         </div>
 
                         <div className="text-xs uppercase tracking-wide opacity-60">planned</div>
@@ -584,6 +603,8 @@ export default function PaperBudget() {
             weekCount={wkCount}
             todaysWeek={todaysWeek}
             plans={plans}
+            expenses={expenses}
+            budget={budget}
             onAdd={addPlan}
             onUpdate={updatePlan}
             onRemove={removePlan}
@@ -605,6 +626,8 @@ function PlannerPanel({
   weekCount,
   todaysWeek,
   plans,
+  expenses,
+  budget,
   onAdd,
   onUpdate,
   onRemove,
@@ -618,6 +641,8 @@ function PlannerPanel({
   weekCount: number;
   todaysWeek: number;
   plans: PlanItem[];
+  expenses: Expense[];
+  budget: number;
   onAdd: (p: Omit<PlanItem, "id">) => void;
   onUpdate: (id: string, patch: Partial<PlanItem>) => void;
   onRemove: (id: string) => void;
@@ -630,6 +655,10 @@ function PlannerPanel({
   const [category, setCategory] = useState<string>("groceries");
   const [note, setNote] = useState<string>("");
   const [targetDate, setTargetDate] = useState<string>("");
+  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [formExpanded, setFormExpanded] = useState<boolean>(true);
+  const [itemsExpanded, setItemsExpanded] = useState<boolean>(true);
+  const [showAllItemsModal, setShowAllItemsModal] = useState<boolean>(false);
 
   const weekOptions = Array.from({ length: weekCount }, (_, i) => i);
   const labelForWeek = (i: number) => {
@@ -642,6 +671,43 @@ function PlannerPanel({
 
   const thisWeekItems = plans.filter((p) => p.weekIndex === weekIndex);
   const nextWeekItems = plans.filter((p) => p.weekIndex === Math.min(weekIndex + 1, weekCount - 1));
+
+  // Financial summary helpers
+  function getWeekDateRange(wkIndex: number) {
+    const off = monStartOffset(year, month);
+    const startDay = Math.max(1, wkIndex * 7 - off + 1);
+    const endDay = Math.min(daysInMonth(year, month), startDay + 6);
+    return { startDay, endDay };
+  }
+
+  function getWeekExpenses(wkIndex: number) {
+    const { startDay, endDay } = getWeekDateRange(wkIndex);
+    return expenses.filter((e) => {
+      const expenseDate = new Date(e.date);
+      const expenseDay = expenseDate.getDate();
+      const expenseMonth = expenseDate.getMonth();
+      const expenseYear = expenseDate.getFullYear();
+      return expenseYear === year && expenseMonth === month &&
+             expenseDay >= startDay && expenseDay <= endDay;
+    });
+  }
+
+  function getWeekSummary(wkIndex: number) {
+    const weekExpenses = getWeekExpenses(wkIndex);
+    const weekPlans = plans.filter((p) => p.weekIndex === wkIndex);
+    const spent = weekExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const planned = weekPlans.reduce((sum, p) => sum + p.amount, 0);
+    return { spent, planned, weekExpenses, weekPlans };
+  }
+
+  function getMonthSummary() {
+    const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalPlanned = plans.reduce((sum, p) => sum + p.amount, 0);
+    const remaining = Math.max(0, budget - totalSpent);
+    return { totalSpent, totalPlanned, remaining, budget };
+  }
+
+  const currentSummary = viewMode === 'week' ? getWeekSummary(weekIndex) : getMonthSummary();
 
   function submitPlan() {
     const a = Number(amount);
@@ -666,112 +732,310 @@ function PlannerPanel({
   return (
     <div className="bg-white/70 border-2 border-amber-200 rounded-2xl shadow-sm">
       {/* sticky header */}
-      <div className="sticky top-0 z-10 p-3 border-b-2 border-amber-200 bg-white/70 backdrop-blur-sm flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-5 h-5 text-stone-600" />
-          <h2
-            className="font-bold text-lg"
-            style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
-          >
-            Weekly planner
-          </h2>
+      <div className="sticky top-0 z-10 p-3 border-b-2 border-amber-200 bg-white/70 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-5 h-5 text-stone-600" />
+            <h2
+              className="font-bold text-lg"
+              style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+            >
+              Financial Planner
+            </h2>
+          </div>
+          <Button size="sm" variant="outline" className="rounded-xl" onClick={onToggleExpanded}>
+            {expanded ? "Show calendar" : "Expand panel"}
+          </Button>
         </div>
-        <Button size="sm" variant="outline" className="rounded-xl" onClick={onToggleExpanded}>
-          {expanded ? "Show calendar" : "Expand panel"}
-        </Button>
+
+        {/* Animated toggle selector */}
+        <div className="relative bg-amber-100/50 rounded-lg p-1">
+          {/* Sliding background indicator */}
+          <div
+            className={`absolute top-1 h-8 w-1/2 bg-white shadow-sm rounded-md transition-all duration-300 ease-in-out ${
+              viewMode === 'week' ? 'left-1' : 'left-1/2'
+            }`}
+          />
+
+          {/* Toggle buttons */}
+          <div className="relative flex">
+            <button
+              onClick={() => setViewMode('week')}
+              className={`relative z-10 flex-1 h-8 text-sm font-medium rounded-md transition-colors duration-200 ${
+                viewMode === 'week'
+                  ? 'text-stone-900'
+                  : 'text-stone-600 hover:text-stone-800'
+              }`}
+            >
+              Week View
+            </button>
+            <button
+              onClick={() => setViewMode('month')}
+              className={`relative z-10 flex-1 h-8 text-sm font-medium rounded-md transition-colors duration-200 ${
+                viewMode === 'month'
+                  ? 'text-stone-900'
+                  : 'text-stone-600 hover:text-stone-800'
+              }`}
+            >
+              Month View
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Financial Summary */}
+      <div className="p-3 border-b border-amber-200/50">
+        <div className="bg-gradient-to-r from-amber-50/80 to-yellow-50/80 rounded-xl p-3 border border-amber-200/40">
+          {viewMode === 'week' ? (
+            <>
+              {/* Week Navigation Header */}
+              <div className="flex items-center justify-between mb-3">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setWeekIndex(Math.max(0, weekIndex - 1))}
+                  disabled={weekIndex === 0}
+                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                <div className="text-center">
+                  <div className="text-sm font-medium text-stone-700">{labelForWeek(weekIndex)}</div>
+                  <div className="text-xs opacity-60">Financial Summary</div>
+                </div>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setWeekIndex(Math.min(weekCount - 1, weekIndex + 1))}
+                  disabled={weekIndex === weekCount - 1}
+                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Week Financial Data */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="text-center">
+                  <div className="opacity-60">Spent this week</div>
+                  <div className="font-bold text-red-600 text-sm">${(currentSummary as any).spent.toFixed(2)}</div>
+                </div>
+                <div className="text-center">
+                  <div className="opacity-60">Planned this week</div>
+                  <div className="font-bold text-blue-600 text-sm">${(currentSummary as any).planned.toFixed(2)}</div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-sm font-medium text-stone-700 mb-2">Month Financial Summary</div>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="text-center">
+                  <div className="opacity-60">Budget</div>
+                  <div className="font-bold text-stone-700 text-sm">${(currentSummary as any).budget.toFixed(2)}</div>
+                </div>
+                <div className="text-center">
+                  <div className="opacity-60">Spent</div>
+                  <div className="font-bold text-red-600 text-sm">${(currentSummary as any).totalSpent.toFixed(2)}</div>
+                </div>
+                <div className="text-center">
+                  <div className="opacity-60">Remaining</div>
+                  <div className="font-bold text-emerald-600 text-sm">${(currentSummary as any).remaining.toFixed(2)}</div>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              {(currentSummary as any).budget > 0 ? (
+                <div className="mt-2">
+                  <div className="flex items-center justify-between text-xs opacity-60 mb-1">
+                    <span>Budget Used</span>
+                    <span>{(((currentSummary as any).totalSpent / (currentSummary as any).budget) * 100).toFixed(1)}%</span>
+                  </div>
+                  <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all"
+                      style={{
+                        width: `${Math.min(100, ((currentSummary as any).totalSpent / (currentSummary as any).budget) * 100)}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-2 text-center">
+                  <div className="text-xs text-stone-500 italic">Set a budget to see progress</div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* form */}
-      <div className="p-3 grid grid-cols-1 gap-2">
-        <div className="grid gap-1">
-          <Label>Week</Label>
-          <Select value={String(weekIndex)} onValueChange={(v) => setWeekIndex(Number(v))}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Pick a week" />
-            </SelectTrigger>
-            <SelectContent>
-              {weekOptions.map((i) => (
-                <SelectItem key={i} value={String(i)}>
-                  {labelForWeek(i)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {viewMode === 'week' && (
+        <div className="border-b border-amber-200/50">
+          <div className="p-3 flex items-center justify-between">
+            <h3 className="text-sm font-medium text-stone-700">Add New Item</h3>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setFormExpanded(!formExpanded)}
+              className="h-6 w-6 p-0"
+            >
+              <ChevronRight className={`h-4 w-4 transition-transform ${formExpanded ? 'rotate-90' : ''}`} />
+            </Button>
+          </div>
+          {formExpanded && (
+            <div className="p-3 pt-0 grid grid-cols-1 gap-2">
+              {/* Amount and Category on same line */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="grid gap-1">
+                  <Label htmlFor="p-amount">Amount</Label>
+                  <Input
+                    id="p-amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label>Category</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pick one" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            <div className="grid gap-1">
+              <Label htmlFor="p-note">Note</Label>
+              <Input id="p-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g., pharmacy, school fees" />
+            </div>
+            <div className="grid gap-1">
+              <Label htmlFor="p-date">Associate to a day (optional)</Label>
+              <div className="flex gap-2">
+                <Input id="p-date" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="flex-1" />
+                <Button onClick={submitPlan} className="rounded-xl bg-amber-200/80 hover:bg-amber-300/80 text-stone-900 border border-amber-300 shadow-sm hover:shadow-md transition-all px-4">
+                  <Plus className="w-4 h-4 mr-1" /> Add to week
+                </Button>
+              </div>
+            </div>
+            </div>
+          )}
         </div>
-        <div className="grid gap-1">
-          <Label htmlFor="p-amount">Amount</Label>
-          <Input
-            id="p-amount"
-            type="number"
-            step="0.01"
-            min="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-          />
-        </div>
-        <div className="grid gap-1">
-          <Label>Category</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Pick one" />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="grid gap-1">
-          <Label htmlFor="p-note">Note</Label>
-          <Input id="p-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g., pharmacy, school fees" />
-        </div>
-        <div className="grid gap-1">
-          <Label htmlFor="p-date">Associate to a day (optional)</Label>
-          <Input id="p-date" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
-        </div>
-        <div className="flex justify-end">
-          <Button onClick={submitPlan}>
-            <Plus className="w-4 h-4 mr-1" /> Add to week
-          </Button>
-        </div>
+      )}
+
+      {/* lists area */}
+      <div>
+        {viewMode === 'week' ? (
+          <div>
+            <div className="p-3 flex items-center justify-between">
+              <h3 className="text-sm font-medium text-stone-700">Week Items ({thisWeekItems.length})</h3>
+              <div className="flex items-center gap-2">
+                {thisWeekItems.length > 3 && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowAllItemsModal(true)}
+                    className="h-6 px-2 text-xs"
+                  >
+                    View all
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setItemsExpanded(!itemsExpanded)}
+                  className="h-6 w-6 p-0"
+                >
+                  <ChevronRight className={`h-4 w-4 transition-transform ${itemsExpanded ? 'rotate-90' : ''}`} />
+                </Button>
+              </div>
+            </div>
+            {itemsExpanded && (
+              <div className="p-3 max-h-60 overflow-y-auto">
+                <WeekList
+                  items={thisWeekItems.slice(0, 3)}
+                  onMoveNext={moveToNextWeek}
+                  onUpdate={onUpdate}
+                  onRemove={onRemove}
+                  onMarkPaid={onMarkPaid}
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-3 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="text-sm font-medium opacity-70 mb-3">Monthly Breakdown</div>
+            {Array.from({ length: weekCount }, (_, i) => {
+              const weekSummary = getWeekSummary(i);
+              const weekItems = plans.filter((p) => p.weekIndex === i);
+              return (
+                <div key={i} className="mb-4 bg-white/50 rounded-lg p-3 border border-amber-200/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium">{labelForWeek(i)}</div>
+                    <div className="text-xs opacity-60">
+                      Spent: ${weekSummary.spent.toFixed(2)} | Planned: ${weekSummary.planned.toFixed(2)}
+                    </div>
+                  </div>
+                  {weekItems.length === 0 ? (
+                    <div className="text-xs text-stone-500 italic">No planned items this week.</div>
+                  ) : (
+                    <div className="space-y-1">
+                      {weekItems.map((item) => (
+                        <div key={item.id} className="text-xs flex items-center justify-between bg-white rounded px-2 py-1">
+                          <span>${item.amount.toFixed(2)} - {item.category}</span>
+                          {item.note && <span className="opacity-60 truncate ml-2">{item.note}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* lists area (scrollable when tall) */}
-      <div className="p-3 space-y-4 max-h-[60vh] overflow-y-auto">
-        <WeekList
-          title="This week"
-          items={thisWeekItems}
-          onMoveNext={moveToNextWeek}
-          onUpdate={onUpdate}
-          onRemove={onRemove}
-          onMarkPaid={onMarkPaid}
-        />
-        <WeekList
-          title="Next week"
-          items={nextWeekItems}
-          onMoveNext={moveToNextWeek}
-          onUpdate={onUpdate}
-          onRemove={onRemove}
-          onMarkPaid={onMarkPaid}
-        />
-      </div>
+      {/* All Items Modal */}
+      <Dialog open={showAllItemsModal} onOpenChange={setShowAllItemsModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>All Week Items ({thisWeekItems.length})</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <WeekList
+              items={thisWeekItems}
+              onMoveNext={moveToNextWeek}
+              onUpdate={onUpdate}
+              onRemove={onRemove}
+              onMarkPaid={onMarkPaid}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 function WeekList({
-  title,
   items,
   onMoveNext,
   onUpdate,
   onRemove,
   onMarkPaid,
 }: {
-  title: string;
   items: PlanItem[];
   onMoveNext: (id: string) => void;
   onUpdate: (id: string, patch: Partial<PlanItem>) => void;
@@ -780,39 +1044,57 @@ function WeekList({
 }) {
   return (
     <div>
-      <div className="text-sm font-medium opacity-70 mb-1">{title}</div>
       {items.length === 0 && <div className="text-sm text-stone-500">No items yet.</div>}
       <div className="space-y-2">
         {items.map((p) => (
-          <div key={p.id} className="rounded-xl border border-stone-200 bg-white px-2 py-1.5">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-sm font-semibold">
-                  ${p.amount.toFixed(2)} {" "}
-                  <span className="ml-1 text-xs text-stone-500">{p.category}</span>
-                </div>
-                {p.note && <div className="text-xs text-stone-500 truncate">{p.note}</div>}
-                <div className="flex items-center gap-2 mt-1">
-                  <Label className="text-[11px] opacity-70">Day:</Label>
-                  <Input
-                    className="h-7 w-36"
-                    type="date"
-                    value={p.targetDate || ""}
-                    onChange={(e) => onUpdate(p.id, { targetDate: e.target.value })}
-                  />
-                </div>
+          <div key={p.id} className="rounded-lg border border-stone-200 bg-white p-2.5 text-sm">
+            {/* First line: Amount, Category, Action buttons */}
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-3">
+                <div className="font-bold text-stone-900">${p.amount.toFixed(2)}</div>
+                <div className="text-stone-600">{p.category}</div>
+                {p.note && <div className="text-xs text-stone-500 truncate max-w-24">• {p.note}</div>}
               </div>
               <div className="flex items-center gap-1">
-                <Button size="sm" variant="outline" className="h-7" onClick={() => onMarkPaid(p)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => onMarkPaid(p)}
+                  disabled={!p.targetDate}
+                  title={!p.targetDate ? "Specify a day first" : "Mark as paid"}
+                >
                   Mark paid
                 </Button>
-                <Button size="sm" variant="ghost" className="h-7" onClick={() => onMoveNext(p.id)}>
-                  → next week
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0 hover:bg-amber-50"
+                  onClick={() => onMoveNext(p.id)}
+                  title="Move to next week"
+                >
+                  <ChevronRight className="h-3 w-3" />
                 </Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => onRemove(p.id)} title="Delete">
-                  <Trash className="w-4 h-4" />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0 hover:bg-red-50"
+                  onClick={() => onRemove(p.id)}
+                  title="Delete"
+                >
+                  <Trash className="w-3 h-3 text-red-500" />
                 </Button>
               </div>
+            </div>
+            {/* Second line: Date input */}
+            <div className="flex items-center gap-2">
+              <Label className="text-xs opacity-70 min-w-fit">Day:</Label>
+              <Input
+                className="h-6 flex-1 text-xs"
+                type="date"
+                value={p.targetDate || ""}
+                onChange={(e) => onUpdate(p.id, { targetDate: e.target.value })}
+              />
             </div>
           </div>
         ))}
