@@ -483,16 +483,13 @@ export default function PaperBudget() {
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-center">
                           <div className="font-semibold">
                             {new Date(year, month, d).toLocaleDateString(undefined, {
                               weekday: "long",
                               month: "short",
                               day: "numeric",
                             })}
-                          </div>
-                          <div className="text-xs text-stone-500">
-                            left after: <span className="font-bold text-stone-800">${leftAfter(d).toFixed(2)}</span>
                           </div>
                         </div>
 
