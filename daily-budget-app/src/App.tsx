@@ -1,4 +1,4 @@
-import PaperBudget from './components/PaperBudgetNew'
+import PaperBudget from './components/PaperBudget'
 
 function App() {
   return <PaperBudget />

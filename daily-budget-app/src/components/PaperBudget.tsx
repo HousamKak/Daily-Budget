@@ -5,14 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { dataService, type Expense, type PlanItem } from "@/lib/data-service";
 
 /**
  * ——————————————————————————————————————————————————————————————————————
- * Cartoony “paper” budget app
+ * Cartoony "paper" budget app
  * - Month calendar on the left (paper sticky notes look)
  * - Compact Weekly Planner panel on the right (with expand mode)
  * - Hover a day to see the planned + paid items; day cells remain clean
- * - LocalStorage persistence
+ * - Supabase + LocalStorage fallback persistence
  * - No external icon deps (inline SVGs)
  * ——————————————————————————————————————————————————————————————————————
  */
@@ -78,7 +79,6 @@ const Wallet = ({ className }: { className?: string }) => (
 // ——— helpers ————————————————————————————————————————————————
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const monthKey = (y: number, m: number) => `${y}-${pad2(m + 1)}`; // m is 0-based
-const STORAGE_KEY = "paper-budget-cartoon-v1";
 const makeId = () =>
   (typeof crypto !== "undefined" && (crypto as any).randomUUID
     ? (crypto as any).randomUUID()
@@ -106,52 +106,6 @@ function weekIndexOf(year: number, month: number, day: number) {
 }
 function ymd(date: Date) {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
-}
-
-// ——— data types ————————————————————————————————————————————
-type Expense = {
-  id: string;
-  date: string; // YYYY-MM-DD
-  amount: number;
-  category?: string;
-  note?: string;
-};
-
-// weekly planned entry
-export type PlanItem = {
-  id: string;
-  monthKey: string; // which month we're planning inside
-  weekIndex: number; // 0-based within month
-  amount: number;
-  category?: string;
-  note?: string;
-  targetDate?: string; // optional explicit day to anchor this item
-};
-
-type Store = {
-  budgets: Record<string, number>; // key => monthly starting cash
-  expenses: Record<string, Expense[]>; // key => list
-  plans: Record<string, PlanItem[]>; // key => month plans
-};
-
-const defaultStore: Store = { budgets: {}, expenses: {}, plans: {} };
-
-function loadStore(): Store {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...defaultStore };
-    const parsed = JSON.parse(raw) as Store;
-    return {
-      budgets: parsed.budgets ?? {},
-      expenses: parsed.expenses ?? {},
-      plans: parsed.plans ?? {},
-    };
-  } catch {
-    return { ...defaultStore };
-  }
-}
-function saveStore(s: Store) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }
 
 // cute categories to pick from
@@ -189,17 +143,29 @@ export default function PaperBudget() {
   const [month, setMonth] = useState<number>(today.getMonth()); // 0-based
 
   const key = useMemo(() => monthKey(year, month), [year, month]);
-  const [store, setStore] = useState<Store>(loadStore());
+  const [budget, setBudgetState] = useState<number>(0);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [plans, setPlans] = useState<PlanItem[]>([]);
   const [plannerExpanded, setPlannerExpanded] = useState(false);
 
-  // keep localStorage in sync
-  useEffect(() => saveStore(store), [store]);
-
-  const budget = store.budgets[key] ?? 0;
-  const expenses = (store.expenses[key] ?? [])
-    .slice()
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const plans = (store.plans[key] ?? []).slice();
+  // Load data from service
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [budgetData, expensesData, plansData] = await Promise.all([
+          dataService.getBudget(key),
+          dataService.getExpenses(key),
+          dataService.getPlans(key),
+        ]);
+        setBudgetState(budgetData);
+        setExpenses(expensesData);
+        setPlans(plansData);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+    loadData();
+  }, [key]);
 
   // totals
   const totalSpent = useMemo(() => expenses.reduce((s, e) => s + e.amount, 0), [expenses]);
@@ -230,50 +196,66 @@ export default function PaperBudget() {
   }
 
   // expense ops
-  function addExpense(e: Expense) {
-    setStore((prev) => {
-      const list = prev.expenses[key] ? [...prev.expenses[key]] : [];
-      list.push(e);
-      return { ...prev, expenses: { ...prev.expenses, [key]: list } };
-    });
+  async function addExpense(e: Expense) {
+    try {
+      await dataService.addExpense(key, e);
+      setExpenses(prev => [...prev, e].sort((a, b) => a.date.localeCompare(b.date)));
+    } catch (error) {
+      console.error('Failed to add expense:', error);
+    }
   }
-  function removeExpense(id: string) {
-    setStore((prev) => {
-      const list = (prev.expenses[key] ?? []).filter((x) => x.id !== id);
-      return { ...prev, expenses: { ...prev.expenses, [key]: list } };
-    });
+  async function removeExpense(id: string) {
+    try {
+      await dataService.removeExpense(key, id);
+      setExpenses(prev => prev.filter(x => x.id !== id));
+    } catch (error) {
+      console.error('Failed to remove expense:', error);
+    }
   }
-  function setBudget(amount: number) {
-    setStore((prev) => ({ ...prev, budgets: { ...prev.budgets, [key]: amount } }));
+  async function setBudget(amount: number) {
+    try {
+      await dataService.setBudget(key, amount);
+      setBudgetState(amount);
+    } catch (error) {
+      console.error('Failed to set budget:', error);
+    }
   }
-  function clearMonth() {
-    setStore((prev) => ({
-      ...prev,
-      budgets: { ...prev.budgets, [key]: 0 },
-      expenses: { ...prev.expenses, [key]: [] },
-      plans: { ...prev.plans, [key]: [] },
-    }));
+  async function clearMonth() {
+    try {
+      await dataService.clearMonth(key);
+      setBudgetState(0);
+      setExpenses([]);
+      setPlans([]);
+    } catch (error) {
+      console.error('Failed to clear month:', error);
+    }
   }
 
   // plans ops
-  function addPlan(p: Omit<PlanItem, "id">) {
-    setStore((prev) => {
-      const list = prev.plans[key] ? [...prev.plans[key]] : [];
-      list.push({ ...p, id: makeId() });
-      return { ...prev, plans: { ...prev.plans, [key]: list } };
-    });
+  async function addPlan(p: Omit<PlanItem, "id">) {
+    try {
+      const newPlan = { ...p, id: makeId() };
+      await dataService.addPlan(key, newPlan);
+      setPlans(prev => [...prev, newPlan]);
+    } catch (error) {
+      console.error('Failed to add plan:', error);
+    }
   }
-  function updatePlan(id: string, patch: Partial<PlanItem>) {
-    setStore((prev) => {
-      const list = (prev.plans[key] ?? []).map((x) => (x.id === id ? { ...x, ...patch } : x));
-      return { ...prev, plans: { ...prev.plans, [key]: list } };
-    });
+  async function updatePlan(id: string, patch: Partial<PlanItem>) {
+    try {
+      await dataService.updatePlan(key, id, patch);
+      setPlans(prev => prev.map(x => x.id === id ? { ...x, ...patch } : x));
+    } catch (error) {
+      console.error('Failed to update plan:', error);
+    }
   }
-  function removePlan(id: string) {
-    setStore((prev) => {
-      const list = (prev.plans[key] ?? []).filter((x) => x.id !== id);
-      return { ...prev, plans: { ...prev.plans, [key]: list } };
-    });
+  async function removePlan(id: string) {
+    try {
+      await dataService.removePlan(key, id);
+      setPlans(prev => prev.filter(x => x.id !== id));
+    } catch (error) {
+      console.error('Failed to remove plan:', error);
+    }
   }
   function markPlanPaid(p: PlanItem) {
     const date = p.targetDate || ymd(new Date());
