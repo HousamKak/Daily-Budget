@@ -301,6 +301,7 @@ export default function PaperBudget() {
 
   // totals
   const totalSpent = useMemo(() => expenses.reduce((s, e) => s + e.amount, 0), [expenses]);
+  const totalPlanned = useMemo(() => plans.reduce((s, p) => s + p.amount, 0), [plans]);
   const leftNow = Math.max(0, budget - totalSpent);
 
   // calendar grid basics
@@ -668,9 +669,10 @@ export default function PaperBudget() {
         </Dialog>
 
         {/* quick summary */}
-        <div className="mt-3 grid grid-cols-3 gap-2 text-sm scale-cards">
+        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scale-cards">
           <SummaryCard title="Starting cash" value={budget} />
           <SummaryCard title="Spent so far" value={totalSpent} />
+          <SummaryCard title="Planned so far" value={totalPlanned} />
           <SummaryCard title="Left now" value={leftNow} highlight />
         </div>
       </div>
