@@ -123,6 +123,31 @@ const CATEGORIES = [
   "other",
 ];
 
+// inspirational quotes for daily motivation
+const DAILY_QUOTES = [
+  "Every penny saved is a step towards your dreams! 💫",
+  "Small changes today = big savings tomorrow! 🌱",
+  "You're doing great! Budget warriors unite! 🛡️",
+  "Money saved is money earned. Keep going! 💪",
+  "Your future self will thank you for today's choices! 🙏",
+  "Budgeting is self-care in disguise! ✨",
+  "Progress, not perfection. Every day counts! 📈",
+  "You're building wealth one day at a time! 🏗️",
+  "Smart spending = smart living! 🧠",
+  "Your financial goals are within reach! 🎯",
+  "Discipline today = freedom tomorrow! 🕊️",
+  "You're rewriting your money story! 📖",
+  "Every budget entry is a victory! 🏆",
+  "Mindful money = mindful life! 🧘",
+  "You're investing in your peace of mind! 🕊️"
+];
+
+const getRandomQuote = () => {
+  const today = new Date();
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+  return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
+};
+
 // ——— tiny runtime tests ————————————————————————————————————————
 (function runTests() {
   try {
@@ -153,6 +178,7 @@ export default function PaperBudget() {
   const [plannerExpanded, setPlannerExpanded] = useState(false);
   // Mobile: bottom tabs to switch between calendar/planner
   const [activeTab, setActiveTab] = useState<'calendar' | 'planner'>('calendar');
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
 
   // Load data from service
   useEffect(() => {
@@ -601,7 +627,13 @@ export default function PaperBudget() {
 
                           {/* Today sticker */}
                           {ymd(today) === `${key}-${pad2(d)}` && (
-                            <div className="absolute -top-1 -right-1 today-sticker">
+                            <div
+                              className="absolute -top-1 -right-1 today-sticker"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowQuoteModal(true);
+                              }}
+                            >
                               ⭐
                             </div>
                           )}
@@ -786,6 +818,49 @@ export default function PaperBudget() {
           </div>
         </div>
       </div>
+
+      {/* Quote of the Day Modal */}
+      <Dialog open={showQuoteModal} onOpenChange={setShowQuoteModal}>
+        <DialogContent className="sm:max-w-md mx-2 sm:mx-auto">
+          <div className="relative bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/70 rounded-2xl p-6 shadow-xl overflow-hidden">
+            {/* Paper texture overlay */}
+            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_1px_1px,rgba(139,69,19,0.3)_1px,transparent_0)] bg-[length:12px_12px] rounded-2xl pointer-events-none"></div>
+
+            {/* Yellow transparent tape */}
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-16 h-6 bg-yellow-300/60 rounded-sm shadow-sm transform rotate-3"></div>
+
+            {/* Torn edge effect */}
+            <div className="absolute -top-1 left-4 right-4 h-3 bg-[repeating-linear-gradient(90deg,#fcd34d,#fcd34d_8px,#fde68a_8px,#fde68a_16px)] rounded-t-2xl opacity-70"></div>
+
+            <div className="relative z-10 text-center">
+              <div className="text-4xl mb-4">✨</div>
+
+              <DialogHeader className="mb-4">
+                <DialogTitle className="text-xl font-bold text-stone-700" style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}>
+                  Quote of the Day
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="bg-white/60 rounded-xl p-4 border border-amber-200/50 mb-4">
+                <p
+                  className="text-stone-700 text-lg leading-relaxed font-medium"
+                  style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+                >
+                  {getRandomQuote()}
+                </p>
+              </div>
+
+              <Button
+                onClick={() => setShowQuoteModal(false)}
+                className="apple-button bg-amber-200/80 hover:bg-amber-300/90 border border-amber-300 hover:border-amber-400 text-stone-900 rounded-xl px-6 py-2 font-semibold shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+              >
+                Thanks! 😊
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
