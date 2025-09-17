@@ -91,8 +91,19 @@ export class DataService {
           .eq('month_key', monthKey)
           .single()
 
-        if (error && error.code !== 'PGRST116') throw error
-        return data?.amount || 0
+        if (error && error.code !== 'PGRST116') {
+          console.error('Supabase budget fetch error:', error)
+          throw error
+        }
+
+        const budget = data?.amount ? Number(data.amount) : 0
+        console.log('Budget loaded from Supabase:', monthKey, budget)
+
+        // Update local store to stay in sync
+        this.localStore.budgets[monthKey] = budget
+        saveStoreToLocalStorage(this.localStore)
+
+        return budget
       } catch (error) {
         console.warn('Supabase error, falling back to localStorage:', error)
         this.useSupabase = false
@@ -112,14 +123,31 @@ export class DataService {
         } else {
           const { error } = await supabase
             .from('budgets')
-            .upsert({ month_key: monthKey, amount, user_id: user.id })
+            .upsert({
+              month_key: monthKey,
+              amount,
+              user_id: user.id
+            }, {
+              onConflict: 'user_id,month_key'
+            })
 
-          if (error) throw error
+          if (error) {
+            console.error('Supabase budget upsert error:', error)
+            throw error
+          }
+          console.log('Budget successfully saved to Supabase:', monthKey, amount)
+
+          // Update local store to stay in sync with Supabase
+          this.localStore.budgets[monthKey] = amount
+          saveStoreToLocalStorage(this.localStore)
           return
         }
       } catch (error) {
         console.warn('Supabase error, falling back to localStorage:', error)
-        this.useSupabase = false
+        // Don't disable Supabase for budget conflicts, might be temporary
+        if (error?.code !== '23505') {
+          this.useSupabase = false
+        }
       }
     }
 
