@@ -12,7 +12,14 @@
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
-    "supabase:status": "supabase status"
+    "supabase:status": "supabase status",
+    "db:migrate": "supabase db push --linked",
+    "db:migrate:local": "supabase db push --local",
+    "db:diff": "supabase db diff --linked",
+    "db:diff:local": "supabase db diff --local",
+    "db:generate": "supabase gen types typescript --linked > src/types/database.types.ts",
+    "db:generate:local": "supabase gen types typescript --local > src/types/database.types.ts",
+    "supabase:migration:new": "supabase migration new"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
