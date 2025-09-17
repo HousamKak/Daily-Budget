@@ -1054,7 +1054,7 @@ function PlannerPanel({
                     size="sm"
                     variant="ghost"
                     onClick={() => setShowAllItemsModal(true)}
-                    className="h-6 px-2 text-xs"
+                    className="h-6 px-2 text-xs cursor-pointer"
                   >
                     View all
                   </Button>
@@ -1165,7 +1165,7 @@ function WeekList({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-6 px-2 text-xs"
+                  className="h-6 px-2 text-xs cursor-pointer"
                   onClick={() => onMarkPaid(p)}
                   disabled={!p.targetDate}
                   title={!p.targetDate ? "Specify a day first" : "Mark as paid"}
@@ -1175,7 +1175,7 @@ function WeekList({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-6 w-6 p-0 hover:bg-amber-50"
+                  className="h-6 w-6 p-0 hover:bg-amber-50 cursor-pointer"
                   onClick={() => onMoveNext(p.id)}
                   title="Move to next week"
                 >
@@ -1184,7 +1184,7 @@ function WeekList({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-6 w-6 p-0 hover:bg-red-50"
+                  className="h-6 w-6 p-0 hover:bg-red-50 cursor-pointer"
                   onClick={() => onRemove(p.id)}
                   title="Delete"
                 >

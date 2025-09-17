@@ -209,7 +209,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
           <Button
             type="submit"
-            className="w-full bg-amber-200 hover:bg-amber-300 text-stone-800 font-semibold rounded-xl border-2 border-amber-300 shadow-lg hover:shadow-xl transition-all"
+            className="w-full bg-amber-200 hover:bg-amber-300 text-stone-800 font-semibold rounded-xl border-2 border-amber-300 shadow-lg hover:shadow-xl transition-all cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? '🔄 Loading...' : (isSignUp ? '🚀 Create Account' : '🔓 Sign In')}
@@ -220,7 +220,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           <Button
             type="button"
             variant="ghost"
-            className="w-full text-stone-600 hover:text-stone-800 hover:bg-amber-100"
+            className="w-full text-stone-600 hover:text-stone-800 hover:bg-amber-100 cursor-pointer"
             onClick={() => {
               setIsSignUp(!isSignUp)
               setError('')
@@ -235,7 +235,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-sm text-stone-500 hover:text-stone-700 hover:bg-amber-50"
+              className="w-full text-sm text-stone-500 hover:text-stone-700 hover:bg-amber-50 cursor-pointer"
               onClick={handleResetPassword}
               disabled={isLoading || !email}
             >
@@ -278,7 +278,7 @@ export function AuthButton() {
           variant="ghost"
           size="sm"
           onClick={() => signOut()}
-          className="text-stone-600 hover:text-stone-800 hover:bg-amber-100 rounded-xl"
+          className="text-stone-600 hover:text-stone-800 hover:bg-amber-100 rounded-xl cursor-pointer"
         >
           Sign Out
         </Button>
