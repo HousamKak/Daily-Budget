@@ -6,7 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 -- Create profiles table (extends auth.users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     full_name TEXT,
@@ -16,7 +16,7 @@ CREATE TABLE profiles (
 );
 
 -- Create budgets table
-CREATE TABLE budgets (
+CREATE TABLE IF NOT EXISTS budgets (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     month_key TEXT NOT NULL, -- Format: "YYYY-MM" (e.g., "2024-03")
@@ -27,7 +27,7 @@ CREATE TABLE budgets (
 );
 
 -- Create expenses table
-CREATE TABLE expenses (
+CREATE TABLE IF NOT EXISTS expenses (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     month_key TEXT NOT NULL, -- Format: "YYYY-MM"
@@ -40,7 +40,7 @@ CREATE TABLE expenses (
 );
 
 -- Create plans table (planned expenses)
-CREATE TABLE plans (
+CREATE TABLE IF NOT EXISTS plans (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     month_key TEXT NOT NULL, -- Format: "YYYY-MM"
@@ -61,12 +61,15 @@ ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE plans ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 CREATE POLICY "Users can insert own profile" ON profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles
     FOR UPDATE USING (auth.uid() = id);
 
@@ -126,11 +129,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger to automatically create profile on user signup
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+-- Note: For production, you may need to set up the auth trigger manually
+-- For local development, we'll handle profile creation through the app
+-- Uncomment the following lines for production if needed:
+--
+-- DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+-- CREATE TRIGGER on_auth_user_created
+--     AFTER INSERT ON auth.users
+--     FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -155,7 +161,7 @@ CREATE TRIGGER update_plans_updated_at BEFORE UPDATE ON plans
     FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 -- Create audit log table
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     table_name TEXT NOT NULL,
     record_id UUID NOT NULL,
@@ -173,7 +179,7 @@ ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own audit logs" ON audit_logs
     FOR SELECT USING (auth.uid() = user_id);
 
--- Create audit function
+-- Create audit function for tables with user_id column
 CREATE OR REPLACE FUNCTION audit_trigger()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -188,6 +194,27 @@ BEGIN
     ELSIF TG_OP = 'INSERT' THEN
         INSERT INTO audit_logs (table_name, record_id, action, new_data, user_id)
         VALUES (TG_TABLE_NAME, NEW.id, TG_OP, row_to_json(NEW), NEW.user_id);
+        RETURN NEW;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create specific audit function for profiles table (uses id instead of user_id)
+CREATE OR REPLACE FUNCTION audit_profiles_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        INSERT INTO audit_logs (table_name, record_id, action, old_data, user_id)
+        VALUES (TG_TABLE_NAME, OLD.id, TG_OP, row_to_json(OLD), OLD.id);
+        RETURN OLD;
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO audit_logs (table_name, record_id, action, old_data, new_data, user_id)
+        VALUES (TG_TABLE_NAME, NEW.id, TG_OP, row_to_json(OLD), row_to_json(NEW), NEW.id);
+        RETURN NEW;
+    ELSIF TG_OP = 'INSERT' THEN
+        INSERT INTO audit_logs (table_name, record_id, action, new_data, user_id)
+        VALUES (TG_TABLE_NAME, NEW.id, TG_OP, row_to_json(NEW), NEW.id);
         RETURN NEW;
     END IF;
     RETURN NULL;
@@ -209,7 +236,7 @@ CREATE TRIGGER audit_plans_trigger
 
 CREATE TRIGGER audit_profiles_trigger
     AFTER INSERT OR UPDATE OR DELETE ON profiles
-    FOR EACH ROW EXECUTE FUNCTION audit_trigger();
+    FOR EACH ROW EXECUTE FUNCTION audit_profiles_trigger();
 
 -- Create SECURE function instead of view to enforce RLS
 CREATE OR REPLACE FUNCTION get_user_monthly_summary()
