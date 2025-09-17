@@ -16,16 +16,28 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
   const { signIn, signUp, resetPassword } = useAuth()
 
-  // Theme-matching icons
-  const UserIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  // Elegant paper-themed icons
+  const EmailIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
     </svg>
   )
 
   const LockIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 0h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  )
+
+  const UserCircleIcon = () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  )
+
+  const KeyIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
     </svg>
   )
 
@@ -39,10 +51,12 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
       if (isSignUp) {
         if (password !== confirmPassword) {
           setError('Passwords do not match')
+          setIsLoading(false)
           return
         }
         if (password.length < 6) {
           setError('Password must be at least 6 characters')
+          setIsLoading(false)
           return
         }
 
@@ -113,7 +127,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
       <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 shadow-xl">
         <DialogHeader className="text-center pb-2">
           <DialogTitle className="text-2xl font-bold text-stone-700 flex items-center justify-center gap-2">
-            <UserIcon />
+            <UserCircleIcon />
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </DialogTitle>
           <p className="text-sm text-stone-600 mt-1">
@@ -125,7 +139,6 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           <div className="space-y-2">
             <Label htmlFor="email" className="text-stone-700 font-medium">Email</Label>
             <div className="relative">
-              <UserIcon />
               <Input
                 id="email"
                 type="email"
@@ -137,7 +150,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 placeholder="your.email@example.com"
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
-                <UserIcon />
+                <EmailIcon />
               </div>
             </div>
           </div>
@@ -208,7 +221,11 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
             type="button"
             variant="ghost"
             className="w-full text-stone-600 hover:text-stone-800 hover:bg-amber-100"
-            onClick={() => setIsSignUp(!isSignUp)}
+            onClick={() => {
+              setIsSignUp(!isSignUp)
+              setError('')
+              setMessage('')
+            }}
             disabled={isLoading}
           >
             {isSignUp ? '← Already have an account? Sign In' : "Don't have an account? Sign Up →"}
@@ -273,7 +290,7 @@ export function AuthButton() {
     <>
       <Button
         onClick={() => setShowAuthDialog(true)}
-        className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80"
+        className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer"
       >
         🔐 Sign In
       </Button>

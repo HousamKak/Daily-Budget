@@ -296,6 +296,9 @@ export default function PaperBudget() {
   const [category, setCategory] = useState<string>("groceries");
   const [note, setNote] = useState<string>("");
 
+  // clear month confirmation dialog
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+
   function submitExpense() {
     const a = Number(amount);
     if (!formDate || isNaN(a) || a <= 0) return;
@@ -336,6 +339,24 @@ export default function PaperBudget() {
         </div>
       )}
 
+      {/* Beta badge in left margin */}
+      <div className="fixed left-4 top-24 z-20 hidden lg:block">
+        <div className="bg-gradient-to-br from-yellow-200 via-amber-200 to-orange-200 border-2 border-amber-300/70 rounded-2xl px-6 py-3 shadow-lg transform -rotate-6 hover:-rotate-3 transition-transform duration-300">
+          {/* Paper texture overlay */}
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_1px_1px,rgba(139,69,19,0.3)_1px,transparent_0)] bg-[length:16px_16px] rounded-2xl"></div>
+          {/* Tape effect */}
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-4 bg-amber-100/80 rounded-sm shadow-sm border border-amber-300/50"></div>
+          <div className="relative">
+            <span
+              className="text-xl font-bold text-stone-800 tracking-wide"
+              style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+            >
+              BETA
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* top bar */}
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
@@ -343,7 +364,7 @@ export default function PaperBudget() {
             <Button
               variant="ghost"
               onClick={gotoPrev}
-              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50"
+              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -356,13 +377,34 @@ export default function PaperBudget() {
             <Button
               variant="ghost"
               onClick={gotoNext}
-              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50"
+              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
+
+            {/* Clear month button - papery cartoony style */}
+            <div className="relative ml-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="relative bg-gradient-to-br from-red-100 via-red-50 to-pink-50 border-2 border-red-300/70 rounded-2xl px-4 py-2 shadow-md transform hover:scale-105 transition-all duration-200 text-red-700 hover:text-red-800 hover:bg-gradient-to-br hover:from-red-200 hover:via-red-100 hover:to-pink-100 cursor-pointer"
+                onClick={() => setClearDialogOpen(true)}
+                style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+              >
+                {/* Paper texture overlay */}
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,rgba(220,38,38,0.3)_1px,transparent_0)] bg-[length:8px_8px] rounded-2xl"></div>
+                {/* Torn edge effect */}
+                <div className="absolute -top-0.5 left-2 right-2 h-1 bg-red-200/50 rounded-t-2xl"></div>
+                <div className="relative flex items-center gap-1.5">
+                  <Trash className="w-4 h-4" />
+                  <span className="text-sm font-bold">Clear this month</span>
+                </div>
+              </Button>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
+
             <div className="flex items-center gap-2 bg-white/80 rounded-xl px-3 py-2 shadow-sm border border-amber-200">
               <Wallet className="w-4 h-4 text-stone-600" />
               <Input
@@ -379,7 +421,7 @@ export default function PaperBudget() {
 
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80">
+                <Button className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer">
                   <Plus className="mr-1 w-4 h-4" /> Add expense
                 </Button>
               </DialogTrigger>
@@ -424,10 +466,10 @@ export default function PaperBudget() {
                     <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g., market, taxi, dinner" />
                   </div>
                   <div className="flex justify-end gap-2 pt-1">
-                    <Button variant="outline" onClick={() => setOpen(false)}>
+                    <Button variant="outline" onClick={() => setOpen(false)} className="cursor-pointer">
                       Cancel
                     </Button>
-                    <Button onClick={submitExpense}>Save</Button>
+                    <Button onClick={submitExpense} className="cursor-pointer">Save</Button>
                   </div>
                 </div>
               </DialogContent>
@@ -436,6 +478,45 @@ export default function PaperBudget() {
             <AuthButton />
           </div>
         </div>
+
+        {/* Clear Month Confirmation Dialog */}
+        <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-bold text-lg text-red-700">⚠️ Clear Month Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-stone-700">
+                This will permanently delete <strong>all data</strong> for <strong>{monthLabel}</strong>:
+              </p>
+              <ul className="text-sm text-stone-600 space-y-1 ml-4">
+                <li>• Budget amount: <strong>${budget.toFixed(2)}</strong></li>
+                <li>• All expenses: <strong>{expenses.length} items (${totalSpent.toFixed(2)})</strong></li>
+                <li>• All planned items: <strong>{plans.length} items</strong></li>
+              </ul>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800 font-medium">
+                  ⚠️ This action cannot be undone!
+                </p>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setClearDialogOpen(false)} className="cursor-pointer">
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+                  onClick={() => {
+                    clearMonth();
+                    setClearDialogOpen(false);
+                  }}
+                >
+                  <Trash className="w-4 h-4 mr-1" />
+                  Clear All Data
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* quick summary */}
         <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
@@ -472,7 +553,7 @@ export default function PaperBudget() {
                   <HoverCard key={d} openDelay={200} closeDelay={200}>
                     <HoverCardTrigger asChild>
                       <button
-                        className={`group relative aspect-square w-full rounded-2xl border border-amber-300/70 bg-[radial-gradient(circle_at_20%_0%,#fff,rgba(255,255,255,0.92))] shadow-sm hover:shadow-md transition-all ${
+                        className={`group relative aspect-square w-full rounded-2xl border border-amber-300/70 bg-[radial-gradient(circle_at_20%_0%,#fff,rgba(255,255,255,0.92))] shadow-sm hover:shadow-md transition-all cursor-pointer ${
                           ymd(today) === `${key}-${pad2(d)}`
                             ? "ring-2 ring-amber-400 ring-offset-1"
                             : ""
@@ -556,13 +637,13 @@ export default function PaperBudget() {
                                 {p.note && <div className="text-xs text-stone-500 truncate">{p.note}</div>}
                               </div>
                               <div className="flex gap-1">
-                                <Button size="sm" variant="outline" className="h-7" onClick={() => markPlanPaid(p)}>
+                                <Button size="sm" variant="outline" className="h-7 cursor-pointer" onClick={() => markPlanPaid(p)}>
                                   Mark paid
                                 </Button>
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  className="h-7 w-7 hover:bg-red-50"
+                                  className="h-7 w-7 hover:bg-red-50 cursor-pointer"
                                   onClick={() => removePlan(p.id)}
                                   title="Delete"
                                 >
@@ -594,7 +675,7 @@ export default function PaperBudget() {
                                 size="icon"
                                 variant="ghost"
                                 onClick={() => removeExpense(e.id)}
-                                className="h-7 w-7 hover:bg-red-50"
+                                className="h-7 w-7 hover:bg-red-50 cursor-pointer"
                                 title="Delete"
                               >
                                 <Trash className="w-4 h-4 text-red-500" />
@@ -609,14 +690,10 @@ export default function PaperBudget() {
               </div>
 
               {/* footer tools */}
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <div className="text-sm opacity-80 flex items-center gap-1">
-                  <CalendarIcon className="w-4 h-4" /> Tip: click any day to add an expense • hover to see planned + paid
-                  items.
+                  <CalendarIcon className="w-4 h-4" /> Tip: click any day to add an expense • hover to see planned + paid items.
                 </div>
-                <Button variant="outline" className="rounded-xl bg-white/60 hover:bg-white/80" onClick={clearMonth}>
-                  Clear this month
-                </Button>
               </div>
             </div>
           )}
@@ -767,8 +844,13 @@ function PlannerPanel({
               Financial Planner
             </h2>
           </div>
-          <Button size="sm" variant="outline" className="rounded-xl" onClick={onToggleExpanded}>
-            {expanded ? "Show calendar" : "Expand panel"}
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl bg-white/60 hover:bg-amber-100 border-amber-200 hover:border-amber-300 shadow-sm hover:shadow-md transition-all duration-200 text-stone-700 hover:text-stone-900 font-medium cursor-pointer"
+            onClick={onToggleExpanded}
+          >
+            {expanded ? "📅 Show calendar" : "📊 Expand panel"}
           </Button>
         </div>
 
@@ -785,7 +867,7 @@ function PlannerPanel({
           <div className="relative flex">
             <button
               onClick={() => setViewMode('week')}
-              className={`relative z-10 flex-1 h-8 text-sm font-medium rounded-md transition-colors duration-200 ${
+              className={`relative z-10 flex-1 h-8 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
                 viewMode === 'week'
                   ? 'text-stone-900'
                   : 'text-stone-600 hover:text-stone-800'
@@ -795,7 +877,7 @@ function PlannerPanel({
             </button>
             <button
               onClick={() => setViewMode('month')}
-              className={`relative z-10 flex-1 h-8 text-sm font-medium rounded-md transition-colors duration-200 ${
+              className={`relative z-10 flex-1 h-8 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
                 viewMode === 'month'
                   ? 'text-stone-900'
                   : 'text-stone-600 hover:text-stone-800'
@@ -819,7 +901,7 @@ function PlannerPanel({
                   variant="ghost"
                   onClick={() => setWeekIndex(Math.max(0, weekIndex - 1))}
                   disabled={weekIndex === 0}
-                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30"
+                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30 cursor-pointer"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -834,7 +916,7 @@ function PlannerPanel({
                   variant="ghost"
                   onClick={() => setWeekIndex(Math.min(weekCount - 1, weekIndex + 1))}
                   disabled={weekIndex === weekCount - 1}
-                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30"
+                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30 cursor-pointer"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -905,7 +987,7 @@ function PlannerPanel({
               size="sm"
               variant="ghost"
               onClick={() => setFormExpanded(!formExpanded)}
-              className="h-6 w-6 p-0"
+              className="h-6 w-6 p-0 cursor-pointer"
             >
               <ChevronRight className={`h-4 w-4 transition-transform ${formExpanded ? 'rotate-90' : ''}`} />
             </Button>
@@ -950,7 +1032,7 @@ function PlannerPanel({
               <Label htmlFor="p-date">Associate to a day (optional)</Label>
               <div className="flex gap-2">
                 <Input id="p-date" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="flex-1" />
-                <Button onClick={submitPlan} className="rounded-xl bg-amber-200/80 hover:bg-amber-300/80 text-stone-900 border border-amber-300 shadow-sm hover:shadow-md transition-all px-4">
+                <Button onClick={submitPlan} className="rounded-xl bg-amber-200/80 hover:bg-amber-300/80 text-stone-900 border border-amber-300 shadow-sm hover:shadow-md transition-all px-4 cursor-pointer">
                   <Plus className="w-4 h-4 mr-1" /> Add to week
                 </Button>
               </div>
@@ -981,7 +1063,7 @@ function PlannerPanel({
                   size="sm"
                   variant="ghost"
                   onClick={() => setItemsExpanded(!itemsExpanded)}
-                  className="h-6 w-6 p-0"
+                  className="h-6 w-6 p-0 cursor-pointer"
                 >
                   <ChevronRight className={`h-4 w-4 transition-transform ${itemsExpanded ? 'rotate-90' : ''}`} />
                 </Button>
