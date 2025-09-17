@@ -179,8 +179,9 @@ export class DataService {
               note: expense.note,
             })
 
-        if (error) throw error
-        return
+          if (error) throw error
+          return
+        }
       } catch (error) {
         console.warn('Supabase error, falling back to localStorage:', error)
         this.useSupabase = false
