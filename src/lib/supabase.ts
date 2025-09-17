@@ -2,13 +2,13 @@ import { createClient } from '@supabase/supabase-js'
 
 // Environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const appEnv = import.meta.env.VITE_APP_ENV || 'development'
 
 // Validate required environment variables
 const requiredEnvVars = {
   VITE_SUPABASE_URL: supabaseUrl,
-  VITE_SUPABASE_ANON_KEY: supabaseKey,
+  VITE_SUPABASE_PUBLISHABLE_KEY: supabaseKey,
   VITE_APP_ENV: appEnv
 }
 
