@@ -327,14 +327,24 @@ export default function PaperBudget() {
 
   return (
     <div className="min-h-screen w-full bg-[repeating-linear-gradient(0deg,#fbf6e9,#fbf6e9_28px,#f2e8cf_28px,#f2e8cf_29px)] text-stone-900">
-      {/* Auth notification banner */}
+      {/* Auth notification sticker in right margin */}
       {supabase && !user && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b-2 border-amber-200 px-4 py-3 shadow-sm">
-          <div className="mx-auto max-w-6xl text-center">
-            <p className="text-sm text-stone-700">
-              <strong className="text-amber-800">💾 Sign in to sync your data across devices!</strong>
-              <span className="text-stone-600 ml-1">Your budget is currently stored locally only.</span>
-            </p>
+        <div className="fixed right-2 top-32 z-20 w-56">
+          <div className="relative bg-gradient-to-br from-orange-100 via-amber-100 to-yellow-100 border-2 border-amber-300/70 rounded-2xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform duration-300">
+            {/* Paper texture overlay */}
+            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_1px_1px,rgba(139,69,19,0.3)_1px,transparent_0)] bg-[length:12px_12px] rounded-2xl"></div>
+
+            {/* Yellow transparent tape */}
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-16 h-6 bg-yellow-300/60 rounded-sm shadow-sm transform rotate-3"></div>
+
+            <div className="relative">
+              <p className="text-sm text-stone-800 font-bold mb-2" style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}>
+                ⚠️ Sign in to save!
+              </p>
+              <p className="text-xs text-stone-600 leading-relaxed" style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}>
+                Your budget will be lost on page refresh. Sign in to keep your data safe!
+              </p>
+            </div>
           </div>
         </div>
       )}
