@@ -151,6 +151,8 @@ export default function PaperBudget() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [plans, setPlans] = useState<PlanItem[]>([]);
   const [plannerExpanded, setPlannerExpanded] = useState(false);
+  // Mobile: bottom tabs to switch between calendar/planner
+  const [activeTab, setActiveTab] = useState<'calendar' | 'planner'>('calendar');
 
   // Load data from service
   useEffect(() => {
@@ -327,9 +329,9 @@ export default function PaperBudget() {
 
   return (
     <div className="min-h-screen w-full bg-[repeating-linear-gradient(0deg,#fbf6e9,#fbf6e9_28px,#f2e8cf_28px,#f2e8cf_29px)] text-stone-900">
-      {/* Auth notification sticker in right margin */}
+      {/* Auth notification sticker (mobile width tweak) */}
       {supabase && !user && (
-        <div className="fixed right-2 top-32 z-20 w-56">
+        <div className="fixed right-2 top-32 z-20 w-48 sm:w-56">
           <div className="relative bg-gradient-to-br from-orange-100 via-amber-100 to-yellow-100 border-2 border-amber-300/70 rounded-2xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform duration-300">
             {/* Paper texture overlay */}
             <div className="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_1px_1px,rgba(139,69,19,0.3)_1px,transparent_0)] bg-[length:12px_12px] rounded-2xl"></div>
@@ -349,8 +351,8 @@ export default function PaperBudget() {
         </div>
       )}
 
-      {/* Beta badge in left margin */}
-      <div className="fixed left-4 top-24 z-20 hidden lg:block">
+      {/* Beta badge (hide on small) */}
+      <div className="fixed left-4 top-24 z-20 hidden md:block">
         <div className="bg-gradient-to-br from-yellow-200 via-amber-200 to-orange-200 border-2 border-amber-300/70 rounded-2xl px-6 py-3 shadow-lg transform -rotate-6 hover:-rotate-3 transition-transform duration-300">
           {/* Paper texture overlay */}
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_1px_1px,rgba(139,69,19,0.3)_1px,transparent_0)] bg-[length:16px_16px] rounded-2xl"></div>
@@ -367,19 +369,19 @@ export default function PaperBudget() {
         </div>
       </div>
 
-      {/* top bar */}
-      <div className="mx-auto max-w-6xl px-4 pt-6 pb-3">
+      {/* top bar (slightly tighter on mobile) */}
+      <div className="mx-auto max-w-6xl px-2 sm:px-4 pt-4 sm:pt-6 pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               onClick={gotoPrev}
-              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer"
+              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer h-8 w-8 sm:h-10 sm:w-10 p-0"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div
-              className="text-2xl sm:text-3xl font-bold tracking-wide drop-shadow-[0_1px_0_rgba(0,0,0,0.1)]"
+              className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-wide drop-shadow-[0_1px_0_rgba(0,0,0,0.1)]"
               style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
             >
               {monthLabel}
@@ -387,7 +389,7 @@ export default function PaperBudget() {
             <Button
               variant="ghost"
               onClick={gotoNext}
-              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer"
+              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer h-8 w-8 sm:h-10 sm:w-10 p-0"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -413,9 +415,9 @@ export default function PaperBudget() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
 
-            <div className="flex items-center gap-2 bg-white/80 rounded-xl px-3 py-2 shadow-sm border border-amber-200">
+            <div className="flex items-center gap-1 sm:gap-2 bg-white/80 rounded-xl px-2 sm:px-3 py-1 sm:py-2 shadow-sm border border-amber-200">
               <Wallet className="w-4 h-4 text-stone-600" />
               <Input
                 type="number"
@@ -424,15 +426,17 @@ export default function PaperBudget() {
                 value={budget || ""}
                 onChange={(e) => setBudget(Number(e.target.value || 0))}
                 placeholder="0.00"
-                className="h-8 w-28 bg-transparent border-none focus-visible:ring-0 p-0 text-right font-semibold"
+                className="h-6 sm:h-8 w-20 sm:w-28 bg-transparent border-none focus-visible:ring-0 p-0 text-right font-semibold text-sm"
               />
-              <span className="text-sm opacity-70">budget</span>
+              <span className="text-xs sm:text-sm opacity-70 hidden sm:inline">budget</span>
             </div>
 
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer">
-                  <Plus className="mr-1 w-4 h-4" /> Add expense
+                <Button className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer h-8 sm:h-10 px-2 sm:px-4 text-sm">
+                  <Plus className="mr-0 sm:mr-1 w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Add expense</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -536,16 +540,16 @@ export default function PaperBudget() {
         </div>
       </div>
 
-      {/* layout: calendar + planner (planner can expand to full width) */}
-      <div className="mx-auto max-w-6xl px-4 pb-12">
+      {/* layout: calendar + planner */}
+      <div className="mx-auto max-w-6xl px-2 sm:px-4 pb-20 lg:pb-12">
         <div className={
           plannerExpanded
             ? "grid grid-cols-1 gap-6 items-start"
             : "grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start"
         }>
-          {/* Calendar section (hidden when expanded) */}
+          {/* Calendar (on mobile: toggled by bottom tabs) */}
           {!plannerExpanded && (
-            <div>
+            <div className={`${activeTab === 'planner' ? 'hidden lg:block' : ''}`}>
               {/* weekday header (Mon-first) */}
               <div className="grid grid-cols-7 gap-2 px-1 text-center font-medium text-stone-600/90">
                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
@@ -700,15 +704,18 @@ export default function PaperBudget() {
               </div>
 
               {/* footer tools */}
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                <div className="text-sm opacity-80 flex items-center gap-1">
-                  <CalendarIcon className="w-4 h-4" /> Tip: click any day to add an expense • hover to see planned + paid items.
+              <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                <div className="text-xs sm:text-sm opacity-80 flex items-center gap-1 text-center">
+                  <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Tip: click any day to add an expense • hover to see planned + paid items.</span>
+                  <span className="sm:hidden">Tap any day to add expense</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Planner Panel */}
+          {/* Planner Panel (on mobile: toggled by bottom tabs) */}
+          <div className={`${activeTab === 'calendar' ? 'hidden lg:block' : ''} mt-6 lg:mt-0`}>
           <PlannerPanel
             year={year}
             month={month}
@@ -725,6 +732,40 @@ export default function PaperBudget() {
             expanded={plannerExpanded}
             onToggleExpanded={() => setPlannerExpanded((v) => !v)}
           />
+          </div>
+        </div>
+
+        {/* Mobile-only bottom tabs */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-amber-200 p-2">
+          <div className="relative bg-amber-100/50 rounded-lg p-1 max-w-md mx-auto">
+            {/* Sliding indicator */}
+            <div
+              className={`absolute top-1 h-10 w-1/2 bg-white shadow-sm rounded-md transition-all duration-300 ease-in-out ${
+                activeTab === 'calendar' ? 'left-1' : 'left-1/2'
+              }`}
+            />
+            {/* Tabs */}
+            <div className="relative flex">
+              <button
+                onClick={() => setActiveTab('calendar')}
+                className={`relative z-10 flex-1 h-10 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-2 ${
+                  activeTab === 'calendar' ? 'text-stone-900' : 'text-stone-600 hover:text-stone-800'
+                }`}
+              >
+                <CalendarIcon className="w-4 h-4" />
+                Calendar
+              </button>
+              <button
+                onClick={() => setActiveTab('planner')}
+                className={`relative z-10 flex-1 h-10 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-2 ${
+                  activeTab === 'planner' ? 'text-stone-900' : 'text-stone-600 hover:text-stone-800'
+                }`}
+              >
+                <Wallet className="w-4 h-4" />
+                Planner
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

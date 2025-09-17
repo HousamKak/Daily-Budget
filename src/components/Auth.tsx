@@ -119,13 +119,13 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 shadow-xl">
+      <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 shadow-xl mx-2 sm:mx-auto">
         <DialogHeader className="text-center pb-2">
-          <DialogTitle className="text-2xl font-bold text-stone-700 flex items-center justify-center gap-2">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-stone-700 flex items-center justify-center gap-2">
             <UserCircleIcon />
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </DialogTitle>
-          <p className="text-sm text-stone-600 mt-1">
+          <p className="text-xs sm:text-sm text-stone-600 mt-1">
             {isSignUp ? 'Join to sync your budget across devices' : 'Sign in to access your budget'}
           </p>
         </DialogHeader>
@@ -141,7 +141,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl"
+                className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl h-11 sm:h-10"
                 placeholder="your.email@example.com"
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
@@ -160,7 +160,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl"
+                className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl h-11 sm:h-10"
                 placeholder="Enter your password"
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
@@ -180,7 +180,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl"
+                  className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl h-11 sm:h-10"
                   placeholder="Confirm your password"
                 />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
@@ -204,7 +204,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
           <Button
             type="submit"
-            className="w-full bg-amber-200 hover:bg-amber-300 text-stone-800 font-semibold rounded-xl border-2 border-amber-300 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+            className="w-full bg-amber-200 hover:bg-amber-300 text-stone-800 font-semibold rounded-xl border-2 border-amber-300 shadow-lg hover:shadow-xl transition-all cursor-pointer h-11 sm:h-10"
             disabled={isLoading}
           >
             {isLoading ? '🔄 Loading...' : (isSignUp ? '🚀 Create Account' : '🔓 Sign In')}
@@ -215,7 +215,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           <Button
             type="button"
             variant="ghost"
-            className="w-full text-stone-600 hover:text-stone-800 hover:bg-amber-100 cursor-pointer"
+            className="w-full text-stone-600 hover:text-stone-800 hover:bg-amber-100 cursor-pointer h-10 text-sm"
             onClick={() => {
               setIsSignUp(!isSignUp)
               setError('')
@@ -230,7 +230,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-sm text-stone-500 hover:text-stone-700 hover:bg-amber-50 cursor-pointer"
+              className="w-full text-sm text-stone-500 hover:text-stone-700 hover:bg-amber-50 cursor-pointer h-10"
               onClick={handleResetPassword}
               disabled={isLoading || !email}
             >
@@ -260,22 +260,23 @@ export function AuthButton() {
 
   if (user) {
     return (
-      <div className="flex items-center gap-2 bg-white/80 rounded-2xl px-3 py-2 shadow-sm border border-amber-200">
+      <div className="flex items-center gap-1 sm:gap-2 bg-white/80 rounded-2xl px-2 sm:px-3 py-1.5 sm:py-2 shadow-sm border border-amber-200">
         <div className="w-6 h-6 bg-amber-200 rounded-full flex items-center justify-center">
           <span className="text-xs font-bold text-stone-700">
             {user.email?.[0]?.toUpperCase()}
           </span>
         </div>
-        <span className="text-sm text-stone-700 hidden sm:inline max-w-24 truncate">
+        <span className="text-xs sm:text-sm text-stone-700 hidden sm:inline max-w-16 sm:max-w-24 truncate">
           {user.email}
         </span>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => signOut()}
-          className="text-stone-600 hover:text-stone-800 hover:bg-amber-100 rounded-xl cursor-pointer"
+          className="text-stone-600 hover:text-stone-800 hover:bg-amber-100 rounded-xl cursor-pointer h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm"
         >
-          Sign Out
+          <span className="hidden sm:inline">Sign Out</span>
+          <span className="sm:hidden">Out</span>
         </Button>
       </div>
     )
@@ -285,9 +286,10 @@ export function AuthButton() {
     <>
       <Button
         onClick={() => setShowAuthDialog(true)}
-        className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer"
+        className="rounded-xl sm:rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer h-8 sm:h-10 px-2 sm:px-4 text-sm"
       >
-        🔐 Sign In
+        <span className="hidden sm:inline">🔐 Sign In</span>
+        <span className="sm:hidden">🔐</span>
       </Button>
       <AuthDialog
         open={showAuthDialog}

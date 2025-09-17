@@ -147,3 +147,48 @@
     height: 0.75rem;
   }
 }
+
+/* ==== MOBILE-ONLY ADDITIONS (safe for desktop) ==== */
+@layer base {
+  /* Better rendering on small screens */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Prevent odd text scaling on mobile */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    /* Smooth iOS scroll */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Larger tap targets & remove highlight */
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Slightly round inputs for touch */
+  input, textarea, select {
+    border-radius: 8px;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  @media (max-width: 767px) {
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+}
