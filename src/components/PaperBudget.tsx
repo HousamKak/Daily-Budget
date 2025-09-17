@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -264,6 +264,23 @@ const getRandomQuote = () => {
   }
 })();
 
+// ——— debounce hook ——————————————————————————————————————————————
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 // ——— main component ————————————————————————————————————————————
 export default function PaperBudget() {
   const { user, loading } = useAuth();
@@ -273,6 +290,8 @@ export default function PaperBudget() {
 
   const key = useMemo(() => monthKey(year, month), [year, month]);
   const [budget, setBudgetState] = useState<number>(0);
+  const [budgetInput, setBudgetInput] = useState<string>("");
+  const [hasLoadedData, setHasLoadedData] = useState<boolean>(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [plans, setPlans] = useState<PlanItem[]>([]);
   const [plannerExpanded, setPlannerExpanded] = useState(false);
@@ -280,8 +299,12 @@ export default function PaperBudget() {
   const [activeTab, setActiveTab] = useState<'calendar' | 'planner'>('calendar');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
 
+  // Debounce the budget input to avoid excessive API calls
+  const debouncedBudgetInput = useDebounce(budgetInput, 800);
+
   // Load data from service
   useEffect(() => {
+    setHasLoadedData(false); // Reset flag when month changes
     const loadData = async () => {
       try {
         const [budgetData, expensesData, plansData] = await Promise.all([
@@ -290,6 +313,8 @@ export default function PaperBudget() {
           dataService.getPlans(key),
         ]);
         setBudgetState(budgetData);
+        setBudgetInput(budgetData ? budgetData.toString() : "");
+        setHasLoadedData(true);
         setExpenses(expensesData);
         setPlans(plansData);
       } catch (error) {
@@ -298,6 +323,17 @@ export default function PaperBudget() {
     };
     loadData();
   }, [key]);
+
+  // Handle debounced budget updates (only after data has loaded)
+  useEffect(() => {
+    // Only process debounced updates if data has loaded and the input has a value and it's different from current budget
+    if (hasLoadedData && debouncedBudgetInput !== "" && debouncedBudgetInput !== budget.toString()) {
+      const numericValue = Number(debouncedBudgetInput);
+      if (!isNaN(numericValue) && numericValue >= 0) {
+        setBudget(numericValue);
+      }
+    }
+  }, [debouncedBudgetInput, budget, hasLoadedData]);
 
   // totals
   const totalSpent = useMemo(() => expenses.reduce((s, e) => s + e.amount, 0), [expenses]);
@@ -550,8 +586,8 @@ export default function PaperBudget() {
                 type="number"
                 min={0}
                 step="0.01"
-                value={budget || ""}
-                onChange={(e) => setBudget(Number(e.target.value || 0))}
+                value={budgetInput}
+                onChange={(e) => setBudgetInput(e.target.value)}
                 placeholder="0.00"
                 className="h-6 sm:h-8 w-20 sm:w-28 bg-transparent border-none focus-visible:ring-0 p-0 text-right font-semibold text-sm"
               />
