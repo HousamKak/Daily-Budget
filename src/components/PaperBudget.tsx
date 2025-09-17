@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -453,6 +453,12 @@ export default function PaperBudget() {
     const d = `${key}-${pad2(day)}`;
     return plans.filter((p) => p.targetDate === d);
   }
+  function plannedAmountOn(day: number) {
+    const d = `${key}-${pad2(day)}`;
+    return plans
+      .filter((p) => p.targetDate === d)
+      .reduce((s, p) => s + p.amount, 0);
+  }
 
   // add-expense dialog state (compact)
   const [open, setOpen] = useState(false);
@@ -775,14 +781,20 @@ export default function PaperBudget() {
                               ⭐
                             </div>
                           )}
-                          <div className="mt-auto w-full text-left space-y-0.5">
-                            <div>
-                              <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">spent</div>
-                              <div className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-0.5 text-red-600">${spentOn(d).toFixed(2)}</div>
+                          <div className="mt-auto w-full flex justify-between">
+                            <div className="text-left space-y-0.5">
+                              <div>
+                                <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">spent</div>
+                                <div className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-0.5 text-red-600">${spentOn(d).toFixed(2)}</div>
+                              </div>
+                              <div>
+                                <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">rem</div>
+                                <div className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-0.5 text-emerald-600">${leftAfter(d).toFixed(2)}</div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">rem</div>
-                              <div className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-0.5 text-emerald-600">${leftAfter(d).toFixed(2)}</div>
+                            <div className="text-left">
+                              <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">planned</div>
+                              <div className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-0.5 text-blue-600">${plannedAmountOn(d).toFixed(2)}</div>
                             </div>
                           </div>
                         </div>
