@@ -480,10 +480,19 @@ export default function PaperBudget() {
                     <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g., market, taxi, dinner" />
                   </div>
                   <div className="flex justify-end gap-2 pt-1">
-                    <Button variant="outline" onClick={() => setOpen(false)} className="cursor-pointer">
+                    <Button
+                      variant="outline"
+                      onClick={() => setOpen(false)}
+                      className="apple-button cursor-pointer rounded-xl bg-white/80 hover:bg-stone-100 border-stone-300 hover:border-stone-400 text-stone-700 hover:text-stone-900 shadow-sm hover:shadow-md transition-all duration-200"
+                    >
                       Cancel
                     </Button>
-                    <Button onClick={submitExpense} className="cursor-pointer">Save</Button>
+                    <Button
+                      onClick={submitExpense}
+                      className="apple-button cursor-pointer rounded-xl bg-amber-200/80 hover:bg-amber-300/90 border border-amber-300 hover:border-amber-400 text-stone-900 hover:text-stone-950 shadow-sm hover:shadow-md transition-all duration-200"
+                    >
+                      Save
+                    </Button>
                   </div>
                 </div>
               </DialogContent>
