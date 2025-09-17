@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { dataService, type Expense, type PlanItem } from "@/lib/data-service";
+import { AuthButton } from "@/components/Auth";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 /**
  * ——————————————————————————————————————————————————————————————————————
@@ -138,6 +141,7 @@ const CATEGORIES = [
 
 // ——— main component ————————————————————————————————————————————
 export default function PaperBudget() {
+  const { user, loading } = useAuth();
   const today = new Date();
   const [year, setYear] = useState<number>(today.getFullYear());
   const [month, setMonth] = useState<number>(today.getMonth()); // 0-based
@@ -307,8 +311,31 @@ export default function PaperBudget() {
     year: "numeric",
   });
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-[repeating-linear-gradient(0deg,#fbf6e9,#fbf6e9_28px,#f2e8cf_28px,#f2e8cf_29px)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-medium text-stone-700">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-[repeating-linear-gradient(0deg,#fbf6e9,#fbf6e9_28px,#f2e8cf_28px,#f2e8cf_29px)] text-stone-900">
+      {/* Auth notification banner */}
+      {supabase && !user && (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b-2 border-amber-200 px-4 py-3 shadow-sm">
+          <div className="mx-auto max-w-6xl text-center">
+            <p className="text-sm text-stone-700">
+              <strong className="text-amber-800">💾 Sign in to sync your data across devices!</strong>
+              <span className="text-stone-600 ml-1">Your budget is currently stored locally only.</span>
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* top bar */}
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
@@ -405,6 +432,8 @@ export default function PaperBudget() {
                 </div>
               </DialogContent>
             </Dialog>
+
+            <AuthButton />
           </div>
         </div>
 

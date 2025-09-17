@@ -59,6 +59,28 @@ export class DataService {
     this.localStore = loadStoreFromLocalStorage()
   }
 
+  // Check if user is authenticated for Supabase operations
+  private async getCurrentUser() {
+    if (!supabase) return null
+
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error || !user) {
+        return null
+      }
+      return user
+    } catch (error) {
+      console.warn('Error checking authentication:', error)
+      return null
+    }
+  }
+
+  // Get authentication status
+  async isAuthenticated(): Promise<boolean> {
+    const user = await this.getCurrentUser()
+    return !!user
+  }
+
   // Budget operations
   async getBudget(monthKey: string): Promise<number> {
     if (this.useSupabase && supabase) {
@@ -83,12 +105,18 @@ export class DataService {
   async setBudget(monthKey: string, amount: number): Promise<void> {
     if (this.useSupabase && supabase) {
       try {
-        const { error } = await supabase
-          .from('budgets')
-          .upsert({ month_key: monthKey, amount, user_id: (await supabase.auth.getUser()).data.user?.id })
+        const user = await this.getCurrentUser()
+        if (!user) {
+          console.warn('User not authenticated, falling back to localStorage')
+          this.useSupabase = false
+        } else {
+          const { error } = await supabase
+            .from('budgets')
+            .upsert({ month_key: monthKey, amount, user_id: user.id })
 
-        if (error) throw error
-        return
+          if (error) throw error
+          return
+        }
       } catch (error) {
         console.warn('Supabase error, falling back to localStorage:', error)
         this.useSupabase = false
@@ -134,17 +162,22 @@ export class DataService {
   async addExpense(monthKey: string, expense: Expense): Promise<void> {
     if (this.useSupabase && supabase) {
       try {
-        const { error } = await supabase
-          .from('expenses')
-          .insert({
-            id: expense.id,
-            user_id: (await supabase.auth.getUser()).data.user?.id,
-            month_key: monthKey,
-            date: expense.date,
-            amount: expense.amount,
-            category: expense.category,
-            note: expense.note,
-          })
+        const user = await this.getCurrentUser()
+        if (!user) {
+          console.warn('User not authenticated, falling back to localStorage')
+          this.useSupabase = false
+        } else {
+          const { error } = await supabase
+            .from('expenses')
+            .insert({
+              id: expense.id,
+              user_id: user.id,
+              month_key: monthKey,
+              date: expense.date,
+              amount: expense.amount,
+              category: expense.category,
+              note: expense.note,
+            })
 
         if (error) throw error
         return
@@ -214,21 +247,27 @@ export class DataService {
   async addPlan(monthKey: string, plan: PlanItem): Promise<void> {
     if (this.useSupabase && supabase) {
       try {
-        const { error } = await supabase
-          .from('plans')
-          .insert({
-            id: plan.id,
-            user_id: (await supabase.auth.getUser()).data.user?.id,
-            month_key: monthKey,
-            week_index: plan.weekIndex,
+        const user = await this.getCurrentUser()
+        if (!user) {
+          console.warn('User not authenticated, falling back to localStorage')
+          this.useSupabase = false
+        } else {
+          const { error } = await supabase
+            .from('plans')
+            .insert({
+              id: plan.id,
+              user_id: user.id,
+              month_key: monthKey,
+              week_index: plan.weekIndex,
             amount: plan.amount,
             category: plan.category,
             note: plan.note,
             target_date: plan.targetDate,
           })
 
-        if (error) throw error
-        return
+          if (error) throw error
+          return
+        }
       } catch (error) {
         console.warn('Supabase error, falling back to localStorage:', error)
         this.useSupabase = false
