@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Paper Budget Account</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+            background: repeating-linear-gradient(0deg, #fbf6e9, #fbf6e9 28px, #f2e8cf 28px, #f2e8cf 29px);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .paper-card {
+            background: radial-gradient(circle at 20% 0%, #fff, rgba(255,255,255,0.92));
+            border: 2px solid rgba(251, 191, 36, 0.7);
+            border-radius: 1rem;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Paper texture overlay */
+        .paper-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 1px 1px, rgba(139,69,19,0.3) 1px, transparent 0);
+            background-size: 12px 12px;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        /* Torn paper edge */
+        .torn-edge {
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            right: 20px;
+            height: 16px;
+            background: repeating-linear-gradient(90deg, #fcd34d, #fcd34d 8px, #fde68a 8px, #fde68a 16px);
+            border-radius: 1rem 1rem 0 0;
+            opacity: 0.7;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .beta-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fde68a, #f59e0b);
+            color: #78716c;
+            padding: 8px 16px;
+            border-radius: 1rem;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            transform: rotate(-2deg);
+        }
+
+        h1 {
+            color: #78716c;
+            font-size: 28px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+        }
+
+        .wallet-icon {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+
+        p {
+            color: #57534e;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 16px 0;
+        }
+
+        .confirm-button {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.8), rgba(245, 158, 11, 0.9));
+            color: #1c1917;
+            padding: 16px 32px;
+            border-radius: 1rem;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 20px 0;
+            border: 2px solid rgba(251, 191, 36, 0.7);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .confirm-button:hover {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 1), rgba(245, 158, 11, 1));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.15);
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(251, 191, 36, 0.3);
+            font-size: 14px;
+            color: #a8a29e;
+            text-align: center;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, rgba(254, 240, 138, 0.5), rgba(253, 230, 138, 0.3));
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #92400e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="paper-card">
+            <div class="torn-edge"></div>
+            <div class="content">
+                <div class="beta-badge">BETA</div>
+
+                <div class="wallet-icon">🏦</div>
+
+                <h1>Welcome to Paper Budget!</h1>
+
+                <p>Hey there, future budget master! 📊</p>
+
+                <p>You're just <span class="highlight">one click away</span> from taking control of your finances with our cartoony paper budget app. Think sticky notes meets smart budgeting!</p>
+
+                <p>Click the button below to confirm your account:</p>
+
+                <a href="{{ .ConfirmationURL }}" class="confirm-button">
+                    ✨ Confirm Your Account ✨
+                </a>
+
+                <div style="background: rgba(52, 211, 153, 0.1); border: 2px solid rgba(52, 211, 153, 0.3); border-radius: 1rem; padding: 20px; margin: 20px 0;">
+                    <p style="margin: 0; color: #065f46; font-weight: bold;">📌 After clicking confirm:</p>
+                    <p style="margin: 8px 0 0 0; color: #065f46;">You'll be redirected to a confirmation page. Once confirmed, <strong>return to the Paper Budget app and sign in</strong> with your email and password to start budgeting!</p>
+                </div>
+
+                <p><strong>What you'll get:</strong></p>
+                <p>
+                    🗓️ Beautiful paper-style monthly calendar<br>
+                    💰 Smart expense tracking & planning<br>
+                    📱 Mobile-friendly design<br>
+                    ☁️ Cloud sync to keep your data safe
+                </p>
+
+                <p>Ready to make budgeting fun again?</p>
+
+                <div class="footer">
+                    <p>If the button doesn't work, copy and paste this link:</p>
+                    <p style="word-break: break-all; color: #78716c;">{{ .ConfirmationURL }}</p>
+                    <br>
+                    <p>Happy budgeting! 🎉<br>
+                    The Paper Budget Team</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
