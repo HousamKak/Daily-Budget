@@ -49,6 +49,26 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
+      - name: Verify secrets before build
+        run: |
+          echo "Pre-build secret verification:"
+          if [ -z "$VITE_SUPABASE_URL" ]; then
+            echo "❌ VITE_SUPABASE_URL is empty or undefined"
+            exit 1
+          else
+            echo "✅ VITE_SUPABASE_URL is set (length: ${#VITE_SUPABASE_URL})"
+          fi
+
+          if [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "❌ VITE_SUPABASE_PUBLISHABLE_KEY is empty or undefined"
+            exit 1
+          else
+            echo "✅ VITE_SUPABASE_PUBLISHABLE_KEY is set (length: ${#VITE_SUPABASE_PUBLISHABLE_KEY})"
+          fi
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
       - name: Build with Vite
         run: npm run build
         env:
