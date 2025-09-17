@@ -145,7 +145,7 @@ export class DataService {
       } catch (error) {
         console.warn('Supabase error, falling back to localStorage:', error)
         // Don't disable Supabase for budget conflicts, might be temporary
-        if (error?.code !== '23505') {
+        if ((error as any)?.code !== '23505') {
           this.useSupabase = false
         }
       }

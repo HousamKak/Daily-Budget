@@ -671,7 +671,7 @@ export default function PaperBudget() {
         {/* quick summary */}
         <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scale-cards">
           <SummaryCard title="Starting cash" value={budget} />
-          <SummaryCard title="Spent so far" value={totalSpent} />
+          <SummaryCard title="Spent so far" value={totalSpent} red />
           <SummaryCard title="Planned so far" value={totalPlanned} />
           <SummaryCard title="Left now" value={leftNow} highlight />
         </div>
@@ -1456,16 +1456,20 @@ function WeekList({
 }
 
 // ——— tiny summary card ————————————————————————————————————————
-function SummaryCard({ title, value, highlight = false }: { title: string; value: number; highlight?: boolean }) {
+function SummaryCard({ title, value, highlight = false, red = false }: { title: string; value: number; highlight?: boolean; red?: boolean }) {
   return (
     <div
       className={`rounded-2xl border-2 shadow-sm px-3 py-2 bg-white/80 ${
-        highlight ? "border-emerald-400 bg-emerald-50/80" : "border-amber-200"
+        highlight
+          ? "border-emerald-400 bg-emerald-50/80"
+          : red
+          ? "border-red-300 bg-red-50/80"
+          : "border-amber-200"
       }`}
     >
       <div className="text-xs opacity-70 font-medium">{title}</div>
       <div
-        className="text-lg font-bold tracking-wide"
+        className={`text-lg font-bold tracking-wide ${red ? "text-red-600" : ""}`}
         style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
       >
         ${Number(value || 0).toFixed(2)}
