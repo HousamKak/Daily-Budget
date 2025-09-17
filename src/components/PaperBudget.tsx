@@ -328,7 +328,7 @@ export default function PaperBudget() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[repeating-linear-gradient(0deg,#fbf6e9,#fbf6e9_28px,#f2e8cf_28px,#f2e8cf_29px)] text-stone-900">
+    <div className="min-h-screen w-full bg-[repeating-linear-gradient(0deg,#fbf6e9,#fbf6e9_28px,#f2e8cf_28px,#f2e8cf_29px)] text-stone-900 no-scroll-container">
       {/* Auth notification sticker (mobile width tweak) */}
       {supabase && !user && (
         <div className="fixed right-2 top-32 z-20 w-48 sm:w-56">
@@ -370,13 +370,13 @@ export default function PaperBudget() {
       </div>
 
       {/* top bar (slightly tighter on mobile) */}
-      <div className="mx-auto max-w-6xl px-2 sm:px-4 pt-4 sm:pt-6 pb-3">
+      <div className="mx-auto max-w-6xl px-2 sm:px-4 pt-4 sm:pt-6 pb-3 scale-header">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               onClick={gotoPrev}
-              className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer h-8 w-8 sm:h-10 sm:w-10 p-0"
+              className="apple-button rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 h-8 w-8 sm:h-10 sm:w-10 p-0"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -533,7 +533,7 @@ export default function PaperBudget() {
         </Dialog>
 
         {/* quick summary */}
-        <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
+        <div className="mt-3 grid grid-cols-3 gap-2 text-sm scale-cards">
           <SummaryCard title="Starting cash" value={budget} />
           <SummaryCard title="Spent so far" value={totalSpent} />
           <SummaryCard title="Left now" value={leftNow} highlight />
@@ -541,7 +541,7 @@ export default function PaperBudget() {
       </div>
 
       {/* layout: calendar + planner */}
-      <div className={`mx-auto max-w-6xl px-2 sm:px-4 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab}`}>
+      <div className={`mx-auto max-w-6xl px-2 sm:px-4 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab} scale-content`}>
         <div className={
           plannerExpanded
             ? "grid grid-cols-1 gap-6 items-start h-full"
@@ -567,7 +567,7 @@ export default function PaperBudget() {
                   <HoverCard key={d} openDelay={200} closeDelay={200}>
                     <HoverCardTrigger asChild>
                       <button
-                        className={`group relative aspect-square w-full rounded-lg xs:rounded-xl sm:rounded-2xl border border-amber-300/70 bg-[radial-gradient(circle_at_20%_0%,#fff,rgba(255,255,255,0.92))] shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                        className={`calendar-day group relative aspect-square w-full rounded-lg xs:rounded-xl sm:rounded-2xl border border-amber-300/70 bg-[radial-gradient(circle_at_20%_0%,#fff,rgba(255,255,255,0.92))] shadow-sm ${
                           ymd(today) === `${key}-${pad2(d)}`
                             ? "ring-2 ring-amber-400 ring-offset-1"
                             : ""
@@ -703,13 +703,6 @@ export default function PaperBudget() {
                 ))}
               </div>
 
-              {/* footer tools - hidden on mobile to save space */}
-              <div className="mt-4 sm:mt-6 hidden sm:flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                <div className="text-xs sm:text-sm opacity-80 flex items-center gap-1 text-center">
-                  <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span>Tip: click any day to add an expense • hover to see planned + paid items.</span>
-                </div>
-              </div>
             </div>
           )}
 
@@ -731,6 +724,16 @@ export default function PaperBudget() {
             expanded={plannerExpanded}
             onToggleExpanded={() => setPlannerExpanded((v) => !v)}
           />
+          </div>
+        </div>
+
+        {/* Footer tip - raised above taskbar */}
+        <div className="mx-auto max-w-6xl px-2 sm:px-4 pb-16 pt-4 hidden sm:block">
+          <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3">
+            <div className="text-xs sm:text-sm opacity-80 flex items-center gap-1 text-left">
+              <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span>Tip: click any day to add an expense • hover to see planned + paid items.</span>
+            </div>
           </div>
         </div>
 
