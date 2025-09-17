@@ -19,7 +19,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: github-pages
+    environment: production
 
     steps:
       - name: Checkout
@@ -42,7 +42,7 @@ jobs:
       - name: Link Supabase project and run migrations
         run: |
           echo "Linking to Supabase project..."
-          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }} --password ${{ secrets.SUPABASE_DB_PASSWORD }}
           echo "Running database migrations..."
           supabase db push --linked || echo "⚠️ Migration failed, continuing with build..."
         env:
