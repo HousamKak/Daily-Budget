@@ -23,4 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-*.env
+# Environment files (all excluded for public repo security)
+.env*
+!.env.example
