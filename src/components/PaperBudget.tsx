@@ -1191,21 +1191,20 @@ function PlannerPanel({
         <div className="bg-gradient-to-r from-amber-50/80 to-yellow-50/80 rounded-xl p-3 border border-amber-200/40">
           {viewMode === 'week' ? (
             <>
-              {/* Week Navigation Header */}
-              <div className="flex items-center justify-between mb-3">
+              {/* Compact Week Navigation & Summary */}
+              <div className="flex items-center justify-between mb-2">
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => setWeekIndex(Math.max(0, weekIndex - 1))}
                   disabled={weekIndex === 0}
-                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30 cursor-pointer"
+                  className="h-6 w-6 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30 cursor-pointer"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-3 w-3" />
                 </Button>
 
-                <div className="text-center">
+                <div className="text-center flex-1">
                   <div className="text-sm font-medium text-stone-700">{labelForWeek(weekIndex)}</div>
-                  <div className="text-xs opacity-60">Financial Summary</div>
                 </div>
 
                 <Button
@@ -1213,21 +1212,21 @@ function PlannerPanel({
                   variant="ghost"
                   onClick={() => setWeekIndex(Math.min(weekCount - 1, weekIndex + 1))}
                   disabled={weekIndex === weekCount - 1}
-                  className="h-7 w-7 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30 cursor-pointer"
+                  className="h-6 w-6 p-0 rounded-full hover:bg-amber-200/50 disabled:opacity-30 cursor-pointer"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3 w-3" />
                 </Button>
               </div>
 
-              {/* Week Financial Data */}
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              {/* Compact Financial Data */}
+              <div className="flex justify-center gap-4 text-xs">
                 <div className="text-center">
-                  <div className="opacity-60">Spent this week</div>
-                  <div className="font-bold text-red-600 text-sm">${(currentSummary as any).spent.toFixed(2)}</div>
+                  <div className="opacity-60">Spent</div>
+                  <div className="font-bold text-red-600">${(currentSummary as any).spent.toFixed(2)}</div>
                 </div>
                 <div className="text-center">
-                  <div className="opacity-60">Planned this week</div>
-                  <div className="font-bold text-blue-600 text-sm">${(currentSummary as any).planned.toFixed(2)}</div>
+                  <div className="opacity-60">Planned</div>
+                  <div className="font-bold text-blue-600">${(currentSummary as any).planned.toFixed(2)}</div>
                 </div>
               </div>
             </>
@@ -1291,9 +1290,9 @@ function PlannerPanel({
           </div>
           {formExpanded && (
             <div className="p-3 pt-0 grid grid-cols-1 gap-2">
-              {/* Amount and Category on same line */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="grid gap-1">
+              {/* Amount, Category, and Day on same line */}
+              <div className="flex gap-2">
+                <div className="flex-1 grid gap-1">
                   <Label htmlFor="p-amount">Amount</Label>
                   <Input
                     id="p-amount"
@@ -1305,7 +1304,7 @@ function PlannerPanel({
                     placeholder="0.00"
                   />
                 </div>
-                <div className="grid gap-1">
+                <div className="flex-1 grid gap-1">
                   <Label>Category</Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger className="w-full">
@@ -1320,20 +1319,36 @@ function PlannerPanel({
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="grid gap-1">
+                  <div className="h-5"></div>
+                  <div className="relative w-9 h-9" title="Assign to a day (optional)">
+                    <input
+                      type="date"
+                      value={targetDate}
+                      onChange={(e) => setTargetDate(e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                      style={{
+                        colorScheme: 'light'
+                      }}
+                    />
+                    <div className="absolute inset-0 w-9 h-9 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/70 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-center">
+                      <CalendarIcon className="w-4 h-4 text-amber-600" />
+                    </div>
+                  </div>
+                </div>
               </div>
-            <div className="grid gap-1">
-              <Label htmlFor="p-note">Note</Label>
-              <Input id="p-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g., pharmacy, school fees" />
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="p-date">Associate to a day (optional)</Label>
+              {/* Note and Add button on same line */}
               <div className="flex gap-2">
-                <Input id="p-date" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="flex-1" />
-                <Button onClick={submitPlan} className="rounded-xl bg-amber-200/80 hover:bg-amber-300/80 text-stone-900 border border-amber-300 shadow-sm hover:shadow-md transition-all px-4 cursor-pointer">
-                  <Plus className="w-4 h-4 mr-1" /> Add to week
-                </Button>
+                <div className="flex-1">
+                  <Label htmlFor="p-note">Note</Label>
+                  <Input id="p-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g., pharmacy, school fees" />
+                </div>
+                <div className="flex flex-col justify-end">
+                  <Button onClick={submitPlan} title="Add to week" className="rounded-xl bg-amber-200/80 hover:bg-amber-300/80 text-stone-900 border border-amber-300 shadow-sm hover:shadow-md transition-all px-2 cursor-pointer h-9 w-9">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
             </div>
           )}
         </div>
