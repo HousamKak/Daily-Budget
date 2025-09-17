@@ -225,7 +225,11 @@ export class DataService {
           .eq('month_key', monthKey)
           .order('created_at', { ascending: true })
 
-        if (error) throw error
+        if (error) {
+          console.error('Supabase plans fetch error:', error)
+          throw error
+        }
+        console.log('Plans loaded from Supabase:', data?.length || 0, 'items')
         return data?.map(row => ({
           id: row.id,
           monthKey: row.month_key,
@@ -260,13 +264,17 @@ export class DataService {
               user_id: user.id,
               month_key: monthKey,
               week_index: plan.weekIndex,
-            amount: plan.amount,
-            category: plan.category,
-            note: plan.note,
-            target_date: plan.targetDate,
-          })
+              amount: plan.amount,
+              category: plan.category,
+              note: plan.note,
+              target_date: plan.targetDate,
+            })
 
-          if (error) throw error
+          if (error) {
+            console.error('Supabase plans insert error:', error)
+            throw error
+          }
+          console.log('Plan successfully saved to Supabase:', plan.id)
           return
         }
       } catch (error) {
