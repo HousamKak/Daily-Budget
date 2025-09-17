@@ -1323,15 +1323,32 @@ function PlannerPanel({
                   <div className="h-5"></div>
                   <div className="relative w-9 h-9" title="Assign to a day (optional)">
                     <input
+                      ref={(input) => {
+                        // Store reference for programmatic access
+                        if (input) {
+                          (input as any)._dateInput = input;
+                        }
+                      }}
                       type="date"
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                      className="sr-only"
                       style={{
                         colorScheme: 'light'
                       }}
                     />
-                    <div className="absolute inset-0 w-9 h-9 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/70 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-center">
+                    <div
+                      className="w-9 h-9 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/70 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-center"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const container = e.currentTarget.parentElement;
+                        const input = container?.querySelector('input[type="date"]') as HTMLInputElement;
+                        if (input) {
+                          input.focus();
+                          input.showPicker?.();
+                        }
+                      }}
+                    >
                       <CalendarIcon className="w-4 h-4 text-amber-600" />
                     </div>
                   </div>
