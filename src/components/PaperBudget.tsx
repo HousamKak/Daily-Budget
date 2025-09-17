@@ -598,6 +598,13 @@ export default function PaperBudget() {
                               {d}
                             </span>
                           </div>
+
+                          {/* Today sticker */}
+                          {ymd(today) === `${key}-${pad2(d)}` && (
+                            <div className="absolute -top-1 -right-1 today-sticker">
+                              ⭐
+                            </div>
+                          )}
                           <div className="mt-auto w-full text-left space-y-0.5">
                             <div>
                               <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">spent</div>
