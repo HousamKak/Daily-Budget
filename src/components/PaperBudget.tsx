@@ -409,7 +409,7 @@ export default function PaperBudget() {
                 <div className="absolute -top-0.5 left-2 right-2 h-1 bg-red-200/50 rounded-t-2xl"></div>
                 <div className="relative flex items-center gap-1.5">
                   <Trash className="w-4 h-4" />
-                  <span className="text-sm font-bold">Clear this month</span>
+                  <span className="text-sm font-bold hidden sm:inline">Clear this month</span>
                 </div>
               </Button>
             </div>
@@ -533,7 +533,7 @@ export default function PaperBudget() {
         </Dialog>
 
         {/* quick summary */}
-        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+        <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
           <SummaryCard title="Starting cash" value={budget} />
           <SummaryCard title="Spent so far" value={totalSpent} />
           <SummaryCard title="Left now" value={leftNow} highlight />
@@ -541,25 +541,25 @@ export default function PaperBudget() {
       </div>
 
       {/* layout: calendar + planner */}
-      <div className="mx-auto max-w-6xl px-2 sm:px-4 pb-20 lg:pb-12">
+      <div className={`mx-auto max-w-6xl px-2 sm:px-4 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab}`}>
         <div className={
           plannerExpanded
-            ? "grid grid-cols-1 gap-6 items-start"
-            : "grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start"
+            ? "grid grid-cols-1 gap-6 items-start h-full"
+            : "grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start h-full lg:h-auto"
         }>
-          {/* Calendar (on mobile: toggled by bottom tabs) */}
+          {/* Calendar - show on mobile only when calendar tab active, always show on desktop */}
           {!plannerExpanded && (
-            <div className={`${activeTab === 'planner' ? 'hidden lg:block' : ''}`}>
+            <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col" data-mobile-view="calendar">
               {/* weekday header (Mon-first) */}
-              <div className="grid grid-cols-7 gap-2 px-1 text-center font-medium text-stone-600/90">
+              <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-2 px-1 text-center font-medium text-stone-600/90">
                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                  <div key={d} className="py-2 text-sm sm:text-base">
+                  <div key={d} className="py-0.5 xs:py-1 sm:py-2 text-xs xs:text-sm md:text-base">
                     {d}
                   </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-2 flex-1">
                 {blanks.map((_, i) => (
                   <div key={`blank-${i}`} />
                 ))}
@@ -567,7 +567,7 @@ export default function PaperBudget() {
                   <HoverCard key={d} openDelay={200} closeDelay={200}>
                     <HoverCardTrigger asChild>
                       <button
-                        className={`group relative aspect-square w-full rounded-2xl border border-amber-300/70 bg-[radial-gradient(circle_at_20%_0%,#fff,rgba(255,255,255,0.92))] shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                        className={`group relative aspect-square w-full rounded-lg xs:rounded-xl sm:rounded-2xl border border-amber-300/70 bg-[radial-gradient(circle_at_20%_0%,#fff,rgba(255,255,255,0.92))] shadow-sm hover:shadow-md transition-all cursor-pointer ${
                           ymd(today) === `${key}-${pad2(d)}`
                             ? "ring-2 ring-amber-400 ring-offset-1"
                             : ""
@@ -580,10 +580,10 @@ export default function PaperBudget() {
                       >
                         {/* torn paper top edge */}
                         <div className="absolute inset-x-0 -top-1 h-3 bg-[repeating-linear-gradient(90deg,#fcd34d,#fcd34d_8px,#fde68a_8px,#fde68a_16px)] rounded-t-2xl opacity-70" />
-                        <div className="p-2 sm:p-3 h-full flex flex-col items-start">
-                          <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="p-0.5 xs:p-1 sm:p-2 md:p-3 h-full flex flex-col items-start">
+                          <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2">
                             <span
-                              className="text-lg sm:text-xl font-bold"
+                              className="text-xs xs:text-sm sm:text-lg md:text-xl font-bold"
                               style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
                             >
                               {d}
@@ -591,12 +591,12 @@ export default function PaperBudget() {
                           </div>
                           <div className="mt-auto w-full text-left space-y-0.5">
                             <div>
-                              <div className="text-[8px] sm:text-[9px] opacity-60 leading-none">spent</div>
-                              <div className="text-[9px] sm:text-[10px] font-bold mt-0.5 text-red-600">${spentOn(d).toFixed(2)}</div>
+                              <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">spent</div>
+                              <div className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-0.5 text-red-600">${spentOn(d).toFixed(2)}</div>
                             </div>
                             <div>
-                              <div className="text-[8px] sm:text-[9px] opacity-60 leading-none">rem</div>
-                              <div className="text-[9px] sm:text-[10px] font-bold mt-0.5 text-emerald-600">${leftAfter(d).toFixed(2)}</div>
+                              <div className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] opacity-60 leading-none">rem</div>
+                              <div className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] font-bold mt-0.5 text-emerald-600">${leftAfter(d).toFixed(2)}</div>
                             </div>
                           </div>
                         </div>
@@ -703,19 +703,18 @@ export default function PaperBudget() {
                 ))}
               </div>
 
-              {/* footer tools */}
-              <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+              {/* footer tools - hidden on mobile to save space */}
+              <div className="mt-4 sm:mt-6 hidden sm:flex flex-wrap items-center justify-center gap-2 sm:gap-3">
                 <div className="text-xs sm:text-sm opacity-80 flex items-center gap-1 text-center">
                   <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Tip: click any day to add an expense • hover to see planned + paid items.</span>
-                  <span className="sm:hidden">Tap any day to add expense</span>
+                  <span>Tip: click any day to add an expense • hover to see planned + paid items.</span>
                 </div>
               </div>
             </div>
           )}
 
           {/* Planner Panel (on mobile: toggled by bottom tabs) */}
-          <div className={`${activeTab === 'calendar' ? 'hidden lg:block' : ''} mt-6 lg:mt-0`}>
+          <div className="mobile-planner-area lg:mt-0" data-mobile-view="planner">
           <PlannerPanel
             year={year}
             month={month}
@@ -735,8 +734,8 @@ export default function PaperBudget() {
           </div>
         </div>
 
-        {/* Mobile-only bottom tabs */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-amber-200 p-2">
+        {/* Mobile-only bottom tabs - sticky navigation */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-amber-200 p-2 z-50 safe-area-inset-bottom shadow-lg">
           <div className="relative bg-amber-100/50 rounded-lg p-1 max-w-md mx-auto">
             {/* Sliding indicator */}
             <div

@@ -198,3 +198,70 @@
     }
   }
 }
+
+/* ==== RESPONSIVE MOBILE BREAKPOINTS ==== */
+@layer utilities {
+  /* Extra small phones: 320px-479px */
+  @media (max-width: 479px) {
+    .xs\:text-xs { font-size: 0.75rem; }
+    .xs\:text-sm { font-size: 0.875rem; }
+    .xs\:p-1 { padding: 0.25rem; }
+    .xs\:gap-0\.5 { gap: 0.125rem; }
+    .xs\:h-screen { height: 100vh; }
+    .xs\:pb-24 { padding-bottom: 6rem; }
+  }
+
+  /* Small phones: 480px-639px */
+  @media (min-width: 480px) and (max-width: 639px) {
+    .xs-sm\:text-sm { font-size: 0.875rem; }
+    .xs-sm\:p-1\.5 { padding: 0.375rem; }
+    .xs-sm\:gap-1 { gap: 0.25rem; }
+  }
+
+  /* Mobile content area with sticky bottom nav */
+  @media (max-width: 1023px) {
+    .mobile-content-area {
+      height: calc(100vh - 80px); /* Account for header */
+      overflow: hidden; /* Prevent double scrolling */
+      padding-bottom: 70px; /* Space for sticky bottom nav */
+    }
+
+    .mobile-calendar-area {
+      height: calc(100vh - 150px); /* Account for header + bottom nav */
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .mobile-planner-area {
+      height: calc(100vh - 150px); /* Account for header + bottom nav */
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Safe area support for devices with home indicators */
+    .safe-area-inset-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* Extra small phone adjustments */
+  @media (max-width: 479px) {
+    .mobile-calendar-area {
+      height: calc(100vh - 240px); /* Tighter spacing on very small screens */
+    }
+  }
+
+  /* Mobile tab switching logic */
+  @media (max-width: 1023px) {
+    /* Hide calendar when planner tab is active */
+    .mobile-tab-planner [data-mobile-view="calendar"] {
+      display: none !important;
+    }
+
+    /* Hide planner when calendar tab is active */
+    .mobile-tab-calendar [data-mobile-view="planner"] {
+      display: none !important;
+    }
+  }
+}
