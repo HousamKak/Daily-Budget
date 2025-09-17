@@ -281,6 +281,38 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+// ——— custom date picker styles ————————————————————————————————
+const datePickerStyles = `
+  .custom-date-picker::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  .custom-date-picker::-webkit-datetime-edit {
+    display: none;
+  }
+
+  /* Style the date picker popup */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  /* Custom styling for the date picker when it opens */
+  input[type="date"] {
+    color-scheme: light;
+    accent-color: #f59e0b;
+  }
+
+  /* Try to position picker above */
+  input[type="date"]:focus {
+    transform: translateY(-100px);
+  }
+`;
+
 // ——— main component ————————————————————————————————————————————
 export default function PaperBudget() {
   const { user, loading } = useAuth();
@@ -498,6 +530,8 @@ export default function PaperBudget() {
 
   return (
     <div className="min-h-screen w-full bg-[repeating-linear-gradient(0deg,#fbf6e9,#fbf6e9_28px,#f2e8cf_28px,#f2e8cf_29px)] text-stone-900 no-scroll-container">
+      {/* Inject custom date picker styles */}
+      <style dangerouslySetInnerHTML={{ __html: datePickerStyles }} />
       {/* Auth notification sticker (mobile width tweak) */}
       {supabase && !user && (
         <div className="fixed right-2 top-32 z-20 w-48 sm:w-56">
@@ -1332,9 +1366,12 @@ function PlannerPanel({
                       type="date"
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
-                      className="sr-only"
+                      className="sr-only custom-date-picker"
                       style={{
-                        colorScheme: 'light'
+                        colorScheme: 'light',
+                        position: 'absolute',
+                        top: '-200px', // Position above to make picker open upward
+                        left: '0'
                       }}
                     />
                     <div
