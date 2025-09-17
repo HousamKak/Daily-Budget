@@ -14,7 +14,7 @@ import { supabase } from "@/lib/supabase";
  * ——————————————————————————————————————————————————————————————————————
  * Cartoony "paper" budget app
  * - Month calendar on the left (paper sticky notes look)
- * - Compact Weekly Planner panel on the right (with expand mode)
+ * - Compact Weekly Planner panel on the right
  * - Hover a day to see the planned + paid items; day cells remain clean
  * - Supabase + LocalStorage fallback persistence
  * - No external icon deps (inline SVGs)
@@ -283,33 +283,53 @@ function useDebounce<T>(value: T, delay: number): T {
 
 // ——— custom date picker styles ————————————————————————————————
 const datePickerStyles = `
-  .custom-date-picker::-webkit-calendar-picker-indicator {
-    display: none;
-  }
-
-  .custom-date-picker::-webkit-datetime-edit {
-    display: none;
-  }
-
-  /* Style the date picker popup */
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0;
-    position: absolute;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-  }
-
-  /* Custom styling for the date picker when it opens */
+  /* Custom styling for all date pickers */
   input[type="date"] {
     color-scheme: light;
     accent-color: #f59e0b;
+    position: relative;
+    transform: none !important;
   }
 
-  /* Try to position picker above */
+  /* Only hide calendar indicator for our custom calendar icon */
+  .custom-calendar-hidden input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Stable date inputs - ensure they behave normally */
+  .date-input-stable {
+    position: static !important;
+    transform: none !important;
+  }
+
+  .date-input-stable::-webkit-calendar-picker-indicator {
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  /* Subtle focus states for date inputs */
   input[type="date"]:focus {
-    transform: translateY(-100px);
+    outline: 1px solid #d97706;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+  }
+
+  /* Even more subtle for stable date inputs */
+  .date-input-stable:focus {
+    outline: 1px solid #d97706;
+    outline-offset: 0px;
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15);
+  }
+
+  /* Prevent date picker from interfering with other elements */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    z-index: 1;
+  }
+
+  /* Ensure date picker popup behaves correctly */
+  input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
   }
 `;
 
@@ -326,7 +346,6 @@ export default function PaperBudget() {
   const [hasLoadedData, setHasLoadedData] = useState<boolean>(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [plans, setPlans] = useState<PlanItem[]>([]);
-  const [plannerExpanded, setPlannerExpanded] = useState(false);
   // Mobile: bottom tabs to switch between calendar/planner
   const [activeTab, setActiveTab] = useState<'calendar' | 'planner'>('calendar');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -634,7 +653,16 @@ export default function PaperBudget() {
               <span className="text-xs sm:text-sm opacity-70 hidden sm:inline">budget</span>
             </div>
 
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog
+              open={open}
+              onOpenChange={(newOpen) => {
+                setOpen(newOpen);
+                // Clear any lingering focus when dialog closes
+                if (!newOpen) {
+                  setTimeout(() => document.body.focus(), 0);
+                }
+              }}
+            >
               <DialogTrigger asChild>
                 <Button className="rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer h-8 sm:h-10 px-2 sm:px-4 text-sm">
                   <Plus className="mr-0 sm:mr-1 w-3 h-3 sm:w-4 sm:h-4" />
@@ -643,59 +671,97 @@ export default function PaperBudget() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="font-bold text-lg">Add an expense</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-3">
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="date">Date</Label>
-                    <Input id="date" type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} />
-                  </div>
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="amount">Amount</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-1.5">
-                    <Label>Category</Label>
-                    <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Pick one" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CATEGORIES.map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="note">Note (optional)</Label>
-                    <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g., market, taxi, dinner" />
-                  </div>
-                  <div className="flex justify-end gap-2 pt-1">
-                    <Button
-                      variant="outline"
-                      onClick={() => setOpen(false)}
-                      className="apple-button cursor-pointer rounded-xl bg-white/80 hover:bg-stone-100 border-stone-300 hover:border-stone-400 text-stone-700 hover:text-stone-900 shadow-sm hover:shadow-md transition-all duration-200"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={submitExpense}
-                      className="apple-button cursor-pointer rounded-xl bg-amber-200/80 hover:bg-amber-300/90 border border-amber-300 hover:border-amber-400 text-stone-900 hover:text-stone-950 shadow-sm hover:shadow-md transition-all duration-200"
-                    >
-                      Save
-                    </Button>
+                <div className="relative bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/70 rounded-2xl p-6 shadow-xl overflow-hidden">
+                  {/* Paper texture overlay */}
+                  <div className="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_1px_1px,rgba(139,69,19,0.3)_1px,transparent_0)] bg-[length:12px_12px] rounded-2xl pointer-events-none"></div>
+
+                  {/* Yellow transparent tape */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-16 h-6 bg-yellow-300/60 rounded-sm shadow-sm transform rotate-3"></div>
+
+                  {/* Torn edge effect */}
+                  <div className="absolute -top-1 left-4 right-4 h-3 bg-[repeating-linear-gradient(90deg,#fcd34d,#fcd34d_8px,#fde68a_8px,#fde68a_16px)] rounded-t-2xl opacity-70"></div>
+
+                  <div className="relative z-10">
+                    <DialogHeader>
+                      <DialogTitle
+                        className="font-bold text-xl text-stone-700 mb-4"
+                        style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+                      >
+                        Add an expense 💰
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="bg-white/60 rounded-xl p-4 border border-amber-200/50 mb-4">
+                      <div className="grid gap-3">
+                        <div className="grid gap-1.5">
+                          <Label htmlFor="date" className="text-stone-700 font-medium">Date</Label>
+                          <Input
+                            id="date"
+                            type="date"
+                            value={formDate}
+                            onChange={(e) => setFormDate(e.target.value)}
+                            autoComplete="off"
+                            className="date-input-stable bg-white/80 border-amber-200"
+                          />
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label htmlFor="amount" className="text-stone-700 font-medium">Amount</Label>
+                          <Input
+                            id="amount"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            autoFocus
+                            className="bg-white/80 border-amber-200"
+                          />
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-stone-700 font-medium">Category</Label>
+                          <Select value={category} onValueChange={setCategory}>
+                            <SelectTrigger className="w-full bg-white/80 border-amber-200">
+                              <SelectValue placeholder="Pick one" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CATEGORIES.map((c) => (
+                                <SelectItem key={c} value={c}>
+                                  {c}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label htmlFor="note" className="text-stone-700 font-medium">Note (optional)</Label>
+                          <Input
+                            id="note"
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            placeholder="e.g., market, taxi, dinner"
+                            className="bg-white/80 border-amber-200"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setOpen(false)}
+                        className="cursor-pointer rounded-xl bg-white/80 hover:bg-stone-100 border-stone-300 hover:border-stone-400 text-stone-700 hover:text-stone-900 shadow-sm hover:shadow-md transition-all duration-200"
+                        style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={submitExpense}
+                        className="cursor-pointer rounded-xl bg-amber-200/80 hover:bg-amber-300/90 border border-amber-300 hover:border-amber-400 text-stone-900 hover:text-stone-950 shadow-sm hover:shadow-md transition-all duration-200"
+                        style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+                      >
+                        Save 💫
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </DialogContent>
@@ -755,14 +821,9 @@ export default function PaperBudget() {
 
       {/* layout: calendar + planner */}
       <div className={`mx-auto max-w-6xl px-2 sm:px-4 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab} scale-content`}>
-        <div className={
-          plannerExpanded
-            ? "grid grid-cols-1 gap-6 items-start h-full"
-            : "grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start h-full lg:h-auto"
-        }>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start h-full lg:h-auto">
           {/* Calendar - show on mobile only when calendar tab active, always show on desktop */}
-          {!plannerExpanded && (
-            <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col" data-mobile-view="calendar">
+          <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col" data-mobile-view="calendar">
               {/* weekday header (Mon-first) */}
               <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-2 px-1 text-center font-medium text-stone-600/90">
                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
@@ -785,7 +846,8 @@ export default function PaperBudget() {
                             ? "ring-2 ring-amber-400 ring-offset-1"
                             : ""
                         }`}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
                           // quick-add by pre-filling the day in the dialog
                           setFormDate(`${key}-${pad2(d)}`);
                           setOpen(true);
@@ -939,7 +1001,6 @@ export default function PaperBudget() {
               </div>
 
             </div>
-          )}
 
           {/* Planner Panel (on mobile: toggled by bottom tabs) */}
           <div className="mobile-planner-area lg:mt-0" data-mobile-view="planner">
@@ -956,8 +1017,6 @@ export default function PaperBudget() {
             onUpdate={updatePlan}
             onRemove={removePlan}
             onMarkPaid={markPlanPaid}
-            expanded={plannerExpanded}
-            onToggleExpanded={() => setPlannerExpanded((v) => !v)}
           />
           </div>
         </div>
@@ -1066,8 +1125,6 @@ function PlannerPanel({
   onUpdate,
   onRemove,
   onMarkPaid,
-  expanded,
-  onToggleExpanded,
 }: {
   year: number;
   month: number;
@@ -1081,8 +1138,6 @@ function PlannerPanel({
   onUpdate: (id: string, patch: Partial<PlanItem>) => void;
   onRemove: (id: string) => void;
   onMarkPaid: (p: PlanItem) => void;
-  expanded: boolean;
-  onToggleExpanded: () => void;
 }) {
   const [weekIndex, setWeekIndex] = useState<number>(todaysWeek);
   const [amount, setAmount] = useState<string>("");
@@ -1165,24 +1220,14 @@ function PlannerPanel({
     <div className="bg-white/70 border-2 border-amber-200 rounded-2xl shadow-sm">
       {/* sticky header */}
       <div className="sticky top-0 z-10 p-3 border-b-2 border-amber-200 bg-white/70 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5 text-stone-600" />
-            <h2
-              className="font-bold text-lg"
-              style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
-            >
-              Financial Planner
-            </h2>
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="rounded-xl bg-white/60 hover:bg-amber-100 border-amber-200 hover:border-amber-300 shadow-sm hover:shadow-md transition-all duration-200 text-stone-700 hover:text-stone-900 font-medium cursor-pointer"
-            onClick={onToggleExpanded}
+        <div className="flex items-center gap-2 mb-2">
+          <CalendarIcon className="w-5 h-5 text-stone-600" />
+          <h2
+            className="font-bold text-lg"
+            style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
           >
-            {expanded ? "📅 Show calendar" : "📊 Expand panel"}
-          </Button>
+            Financial Planner
+          </h2>
         </div>
 
         {/* Animated toggle selector */}
@@ -1355,37 +1400,17 @@ function PlannerPanel({
                 </div>
                 <div className="grid gap-1">
                   <div className="h-5"></div>
-                  <div className="relative w-9 h-9" title="Assign to a day (optional)">
+                  <div className="relative w-9 h-9 custom-calendar-hidden" title="Assign to a day (optional)">
                     <input
-                      ref={(input) => {
-                        // Store reference for programmatic access
-                        if (input) {
-                          (input as any)._dateInput = input;
-                        }
-                      }}
                       type="date"
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
-                      className="sr-only custom-date-picker"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       style={{
-                        colorScheme: 'light',
-                        position: 'absolute',
-                        top: '-200px', // Position above to make picker open upward
-                        left: '0'
+                        colorScheme: 'light'
                       }}
                     />
-                    <div
-                      className="w-9 h-9 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/70 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-center"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const container = e.currentTarget.parentElement;
-                        const input = container?.querySelector('input[type="date"]') as HTMLInputElement;
-                        if (input) {
-                          input.focus();
-                          input.showPicker?.();
-                        }
-                      }}
-                    >
+                    <div className="absolute inset-0 w-9 h-9 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300/70 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center pointer-events-none">
                       <CalendarIcon className="w-4 h-4 text-amber-600" />
                     </div>
                   </div>
@@ -1562,10 +1587,11 @@ function WeekList({
             <div className="flex items-center gap-2">
               <Label className="text-xs opacity-70 min-w-fit">Day:</Label>
               <Input
-                className="h-6 flex-1 text-xs"
+                className="h-6 flex-1 text-xs date-input-stable"
                 type="date"
                 value={p.targetDate || ""}
                 onChange={(e) => onUpdate(p.id, { targetDate: e.target.value })}
+                autoComplete="off"
               />
             </div>
           </div>
