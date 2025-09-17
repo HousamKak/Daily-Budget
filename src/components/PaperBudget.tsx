@@ -805,7 +805,7 @@ export default function PaperBudget() {
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
                       <div className="space-y-2">
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center justify-between">
                           <div className="font-semibold">
                             {new Date(year, month, d).toLocaleDateString(undefined, {
                               weekday: "long",
@@ -813,13 +813,16 @@ export default function PaperBudget() {
                               day: "numeric",
                             })}
                           </div>
+                          <div className="text-xs text-stone-500">
+                            budget: <span className="font-bold text-stone-800">${budget.toFixed(2)}</span>
+                          </div>
                         </div>
 
-                        {/* Budget Summary */}
+                        {/* Day Summary */}
                         <div className="grid grid-cols-3 gap-2 text-xs bg-amber-50/50 rounded-lg p-2 border border-amber-200/30">
                           <div className="text-center">
-                            <div className="opacity-60">Budget</div>
-                            <div className="font-bold text-stone-800">${budget.toFixed(2)}</div>
+                            <div className="opacity-60">Planned</div>
+                            <div className="font-bold text-blue-600">${plannedAmountOn(d).toFixed(2)}</div>
                           </div>
                           <div className="text-center">
                             <div className="opacity-60">Spent</div>
