@@ -59,7 +59,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
         if (error) {
           setError(error.message)
         } else {
-          setMessage('Check your email for a confirmation link!')
+          setMessage('📧 Confirmation email sent! Check your inbox and click the link to activate your account. Then return here to sign in.')
         }
       } else {
         const { error } = await signIn(email, password)
