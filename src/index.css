@@ -62,7 +62,7 @@
     transform: scale(0.9);
     transform-origin: top left;
     width: 111.11%; /* 100% / 0.9 to maintain full width coverage */
-    height: 111.11vh; /* Ensure full height coverage */
+    height: 100vh; /* Ensure full height coverage */
   }
 }
 
