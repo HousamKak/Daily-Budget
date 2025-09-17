@@ -57,6 +57,12 @@
     margin: 0;
     min-height: 100vh;
     font-family: system-ui, -apple-system, sans-serif;
+
+    /* 90% scale for better visual appearance */
+    transform: scale(0.9);
+    transform-origin: top left;
+    width: 111.11%; /* 100% / 0.9 to maintain full width coverage */
+    height: 111.11vh; /* Ensure full height coverage */
   }
 }
 
