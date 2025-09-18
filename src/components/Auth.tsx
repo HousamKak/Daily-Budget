@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useAuth } from '@/contexts/AuthContext'
+import { dialogStyles, cn } from '@/styles'
 
 export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -119,21 +120,32 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 shadow-xl mx-2 sm:mx-auto">
-        <DialogHeader className="text-center pb-2">
-          <DialogTitle className="text-xl sm:text-2xl font-bold text-stone-700 flex items-center justify-center gap-2">
-            <UserCircleIcon />
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
-          </DialogTitle>
-          <p className="text-xs sm:text-sm text-stone-600 mt-1">
-            {isSignUp ? 'Join to sync your budget across devices' : 'Sign in to access your budget'}
-          </p>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[425px] mx-2 sm:mx-auto">
+        <div className={dialogStyles.paperDialog}>
+          {/* Paper texture overlay */}
+          <div className={dialogStyles.paperTexture}></div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-stone-700 font-medium">Email</Label>
-            <div className="relative">
+          {/* Yellow transparent tape */}
+          <div className={dialogStyles.yellowTape}></div>
+
+          {/* Torn edge effect */}
+          <div className={dialogStyles.tornEdge}></div>
+
+          <div className={dialogStyles.contentWrapper}>
+            <DialogHeader className={dialogStyles.header.container}>
+              <DialogTitle className={dialogStyles.header.title}>
+                <UserCircleIcon />
+                {isSignUp ? 'Create Account' : 'Welcome Back'}
+              </DialogTitle>
+              <p className={dialogStyles.header.subtitle}>
+                {isSignUp ? 'Join to sync your budget across devices' : 'Sign in to access your budget'}
+              </p>
+            </DialogHeader>
+
+        <form onSubmit={handleSubmit} className={dialogStyles.form.container}>
+          <div className={dialogStyles.form.fieldContainer}>
+            <Label htmlFor="email" className={dialogStyles.form.label}>Email</Label>
+            <div className={dialogStyles.form.inputWrapper}>
               <Input
                 id="email"
                 type="email"
@@ -141,18 +153,18 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl h-11 sm:h-10"
+                className={cn("pl-10 h-11 sm:h-10", dialogStyles.form.input)}
                 placeholder="your.email@example.com"
               />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
+              <div className={dialogStyles.form.iconContainer}>
                 <EmailIcon />
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-stone-700 font-medium">Password</Label>
-            <div className="relative">
+          <div className={dialogStyles.form.fieldContainer}>
+            <Label htmlFor="password" className={dialogStyles.form.label}>Password</Label>
+            <div className={dialogStyles.form.inputWrapper}>
               <Input
                 id="password"
                 type="password"
@@ -160,19 +172,19 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl h-11 sm:h-10"
+                className={cn("pl-10 h-11 sm:h-10", dialogStyles.form.input)}
                 placeholder="Enter your password"
               />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
+              <div className={dialogStyles.form.iconContainer}>
                 <LockIcon />
               </div>
             </div>
           </div>
 
           {isSignUp && (
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-stone-700 font-medium">Confirm Password</Label>
-              <div className="relative">
+            <div className={dialogStyles.form.fieldContainer}>
+              <Label htmlFor="confirmPassword" className={dialogStyles.form.label}>Confirm Password</Label>
+              <div className={dialogStyles.form.inputWrapper}>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -180,10 +192,10 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-10 bg-white/80 border-amber-200 focus:border-amber-400 focus:ring-amber-200 rounded-xl h-11 sm:h-10"
+                  className={cn("pl-10 h-11 sm:h-10", dialogStyles.form.input)}
                   placeholder="Confirm your password"
                 />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
+                <div className={dialogStyles.form.iconContainer}>
                   <LockIcon />
                 </div>
               </div>
@@ -191,52 +203,54 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           )}
 
           {error && (
-            <div className="text-red-700 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className={dialogStyles.messages.error}>
               {error}
             </div>
           )}
 
           {message && (
-            <div className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className={dialogStyles.messages.success}>
               {message}
             </div>
           )}
 
-          <Button
-            type="submit"
-            className="w-full bg-amber-200 hover:bg-amber-300 text-stone-800 font-semibold rounded-xl border-2 border-amber-300 shadow-lg hover:shadow-xl transition-all cursor-pointer h-11 sm:h-10"
-            disabled={isLoading}
-          >
-            {isLoading ? '🔄 Loading...' : (isSignUp ? '🚀 Create Account' : '🔓 Sign In')}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              className={cn("w-full h-11 sm:h-10", dialogStyles.buttons.primary)}
+              disabled={isLoading}
+            >
+              {isLoading ? '🔄 Loading...' : (isSignUp ? '🚀 Create Account' : '🔓 Sign In')}
+            </Button>
+          </form>
 
-        <div className="space-y-2 pt-2 border-t border-amber-200">
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full text-stone-600 hover:text-stone-800 hover:bg-amber-100 cursor-pointer h-10 text-sm"
-            onClick={() => {
-              setIsSignUp(!isSignUp)
-              setError('')
-              setMessage('')
-            }}
-            disabled={isLoading}
-          >
-            {isSignUp ? '← Already have an account? Sign In' : "Don't have an account? Sign Up →"}
-          </Button>
-
-          {!isSignUp && (
+          <div className={dialogStyles.footer}>
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-sm text-stone-500 hover:text-stone-700 hover:bg-amber-50 cursor-pointer h-10"
-              onClick={handleResetPassword}
-              disabled={isLoading || !email}
+              className={dialogStyles.buttons.ghost}
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setError('')
+                setMessage('')
+              }}
+              disabled={isLoading}
             >
-              🔑 Forgot Password?
+              {isSignUp ? '← Already have an account? Sign In' : "Don't have an account? Sign Up →"}
             </Button>
-          )}
+
+            {!isSignUp && (
+              <Button
+                type="button"
+                variant="ghost"
+                className={cn("text-stone-500 hover:text-stone-700 hover:bg-amber-50", dialogStyles.buttons.ghost)}
+                onClick={handleResetPassword}
+                disabled={isLoading || !email}
+              >
+                🔑 Forgot Password?
+              </Button>
+            )}
+          </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -251,7 +265,7 @@ export function AuthButton() {
     return (
       <Button
         disabled
-        className="rounded-2xl bg-amber-100 text-stone-600 border border-amber-200"
+        className={cn("rounded-2xl bg-amber-100 text-stone-600 border border-amber-200", dialogStyles.buttons.primary)}
       >
         🔄 Loading...
       </Button>
@@ -286,7 +300,7 @@ export function AuthButton() {
     <>
       <Button
         onClick={() => setShowAuthDialog(true)}
-        className="rounded-xl sm:rounded-2xl shadow hover:shadow-md transition-all bg-amber-200/80 text-stone-900 border border-amber-300 hover:bg-amber-300/80 cursor-pointer h-8 sm:h-10 px-2 sm:px-4 text-sm"
+        className={cn("rounded-xl sm:rounded-2xl h-8 sm:h-10 px-2 sm:px-4 text-sm", dialogStyles.buttons.primary)}
       >
         <span className="hidden sm:inline">🔐 Sign In</span>
         <span className="sm:hidden">🔐</span>
