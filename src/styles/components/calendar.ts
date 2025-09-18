@@ -32,7 +32,7 @@ export const calendarStyles = {
 
   // Weekday header
   weekdayHeader: `grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-2 px-1 text-center font-medium ${paperTheme.colors.text.muted}`,
-  weekdayCell: 'py-0.5 xs:py-1 sm:py-2 text-xs xs:text-sm md:text-base',
+  weekdayCell: 'py-0.5 xs:py-1 sm:py-1.5 text-xs xs:text-sm md:text-base',
 
   // Calendar grid
   calendarGrid: 'grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-2 flex-1',

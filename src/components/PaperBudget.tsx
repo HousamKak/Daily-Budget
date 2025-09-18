@@ -245,7 +245,7 @@ export default function PaperBudget() {
       </div>
 
       {/* top bar (slightly tighter on mobile) */}
-      <div className="mx-auto max-w-6xl px-2 sm:px-4 pt-4 sm:pt-6 pb-3">
+      <div className="mx-auto max-w-7xl px-1 sm:px-2 pt-4 sm:pt-6 pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-1 sm:gap-2">
             <Button
@@ -386,10 +386,10 @@ export default function PaperBudget() {
       </div>
 
       {/* layout: calendar + planner */}
-      <div className={`mx-auto max-w-6xl px-2 sm:px-4 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab}`}>
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start h-full lg:h-auto">
+      <div className={`mx-auto max-w-7xl px-1 sm:px-2 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab}`}>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-4 items-start h-full lg:h-auto">
           {/* Calendar - show on mobile only when calendar tab active, always show on desktop */}
-          <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col" data-mobile-view="calendar">
+          <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col lg:max-h-[85vh]" data-mobile-view="calendar">
             <Calendar
               year={year}
               month={month}
@@ -428,7 +428,7 @@ export default function PaperBudget() {
         </div>
 
         {/* Footer tip - raised above taskbar */}
-        <div className="mx-auto max-w-6xl px-2 sm:px-4 pb-16 pt-4 hidden sm:block">
+        <div className="mx-auto max-w-7xl px-1 sm:px-2 pb-16 pt-4 hidden sm:block">
           <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3">
             <div className="text-xs sm:text-sm opacity-80 flex items-center gap-1 text-left">
               <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
