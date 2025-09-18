@@ -66,7 +66,7 @@ export function ExpenseDialog({
           <div className={dialogStyles.tornEdge}></div>
 
           <div className={dialogStyles.contentWrapper}>
-            <DialogHeader>
+            <DialogHeader className={dialogStyles.header.container}>
               <DialogTitle className={dialogStyles.header.title}>
                 Add an expense 💰
               </DialogTitle>
@@ -95,6 +95,7 @@ export function ExpenseDialog({
                     value={amount}
                     onChange={(e) => onAmountChange(e.target.value)}
                     autoFocus
+                    inputMode="decimal"
                     className={dialogStyles.form.input}
                   />
                 </div>

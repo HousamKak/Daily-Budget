@@ -18,8 +18,8 @@ export const dialogStyles = {
 
   // Dialog header
   header: {
-    container: 'text-center pb-2',
-    title: `text-xl sm:text-2xl font-bold ${paperTheme.colors.text.secondary} flex items-center justify-center gap-2 ${paperTheme.fonts.handwriting}`,
+    container: 'text-center pb-4 pt-2',
+    title: `text-xl sm:text-2xl font-bold ${paperTheme.colors.text.secondary} flex items-center justify-center gap-2 ${paperTheme.fonts.handwriting} leading-relaxed py-3 min-h-[3rem]`,
     subtitle: `text-xs sm:text-sm ${paperTheme.colors.text.muted} mt-1 ${paperTheme.fonts.handwriting}`,
   },
 

@@ -216,10 +216,10 @@ export default function PaperBudget() {
             <div className={layoutStyles.notifications.authStickerTexture}></div>
 
             <div className="relative">
-              <p className="text-sm text-stone-800 font-bold mb-2" style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}>
+              <p className="text-sm text-stone-800 font-bold mb-2 handwriting">
                 ⚠️ Sign in to save!
               </p>
-              <p className="text-xs text-stone-600 leading-relaxed" style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}>
+              <p className="text-xs text-stone-600 leading-relaxed handwriting">
                 Your budget will be lost on page refresh. Sign in to keep your data safe!
               </p>
             </div>
@@ -235,10 +235,7 @@ export default function PaperBudget() {
           {/* Paper texture overlay */}
           <div className={layoutStyles.notifications.betaBadgeTexture}></div>
           <div className="relative">
-            <span
-              className="text-xl font-bold text-stone-800 tracking-wide"
-              style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
-            >
+            <span className="text-xl font-bold text-stone-800 tracking-wide handwriting">
               BETA
             </span>
           </div>
@@ -248,26 +245,25 @@ export default function PaperBudget() {
       </div>
 
       {/* top bar (slightly tighter on mobile) */}
-      <div className="mx-auto max-w-6xl px-2 sm:px-4 pt-4 sm:pt-6 pb-3 scale-header">
+      <div className="mx-auto max-w-6xl px-2 sm:px-4 pt-4 sm:pt-6 pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               onClick={gotoPrev}
               className="apple-button rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 h-8 w-8 sm:h-10 sm:w-10 p-0"
+              aria-label="Previous month"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div
-              className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-wide drop-shadow-[0_1px_0_rgba(0,0,0,0.1)]"
-              style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
-            >
+            <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-wide drop-shadow-[0_1px_0_rgba(0,0,0,0.1)] handwriting">
               {monthLabel}
-            </div>
+            </h1>
             <Button
               variant="ghost"
               onClick={gotoNext}
               className="rounded-2xl shadow-sm bg-white/60 hover:bg-white/80 border border-amber-200/50 cursor-pointer h-8 w-8 sm:h-10 sm:w-10 p-0"
+              aria-label="Next month"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -277,9 +273,8 @@ export default function PaperBudget() {
               <Button
                 variant="outline"
                 size="sm"
-                className="relative bg-gradient-to-br from-red-100 via-red-50 to-pink-50 border-2 border-red-300/70 rounded-2xl px-4 py-2 shadow-md transform hover:scale-105 transition-all duration-200 text-red-700 hover:text-red-800 hover:bg-gradient-to-br hover:from-red-200 hover:via-red-100 hover:to-pink-100 cursor-pointer"
+                className="relative bg-gradient-to-br from-red-100 via-red-50 to-pink-50 border-2 border-red-300/70 rounded-2xl px-4 py-2 shadow-md transform hover:scale-105 transition-all duration-200 text-red-700 hover:text-red-800 hover:bg-gradient-to-br hover:from-red-200 hover:via-red-100 hover:to-pink-100 cursor-pointer handwriting"
                 onClick={() => setClearDialogOpen(true)}
-                style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
               >
                 {/* Paper texture overlay */}
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,rgba(220,38,38,0.3)_1px,transparent_0)] bg-[length:8px_8px] rounded-2xl"></div>
@@ -304,6 +299,8 @@ export default function PaperBudget() {
                 value={budgetInput}
                 onChange={(e) => setBudgetInput(e.target.value)}
                 placeholder="0.00"
+                inputMode="decimal"
+                aria-label="Monthly budget amount"
                 className="h-6 sm:h-8 w-20 sm:w-28 bg-transparent border-none focus-visible:ring-0 p-0 text-right font-semibold text-sm"
               />
               <span className="text-xs sm:text-sm opacity-70 hidden sm:inline">budget</span>
@@ -330,10 +327,21 @@ export default function PaperBudget() {
         {/* Clear Month Confirmation Dialog */}
         <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
           <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="font-bold text-lg text-red-700">⚠️ Clear Month Data</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
+            <div className="relative bg-gradient-to-br from-red-100 via-red-50 to-pink-50 border-2 border-red-300/70 rounded-2xl p-6 shadow-xl overflow-hidden">
+              {/* Paper texture overlay */}
+              <div className="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_1px_1px,rgba(220,38,38,0.3)_1px,transparent_0)] bg-[length:12px_12px] rounded-2xl pointer-events-none"></div>
+
+              {/* Red tape effect */}
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-16 h-6 bg-red-300/60 rounded-sm shadow-sm transform rotate-3"></div>
+
+              {/* Torn edge effect */}
+              <div className="absolute -top-1 left-4 right-4 h-3 bg-[repeating-linear-gradient(90deg,#fca5a5,#fca5a5_8px,#fecaca_8px,#fecaca_16px)] rounded-t-2xl opacity-70"></div>
+
+              <div className="relative z-10">
+                <DialogHeader>
+                  <DialogTitle className="font-bold text-xl text-red-700 handwriting text-center mb-4">⚠️ Clear Month Data</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
               <p className="text-sm text-stone-700">
                 This will permanently delete <strong>all data</strong> for <strong>{monthLabel}</strong>:
               </p>
@@ -347,27 +355,29 @@ export default function PaperBudget() {
                   ⚠️ This action cannot be undone!
                 </p>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setClearDialogOpen(false)} className="cursor-pointer">
-                  Cancel
-                </Button>
-                <Button
-                  className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
-                  onClick={() => {
-                    clearMonth();
-                    setClearDialogOpen(false);
-                  }}
-                >
-                  <Trash className="w-4 h-4 mr-1" />
-                  Clear All Data
-                </Button>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" onClick={() => setClearDialogOpen(false)} className="cursor-pointer handwriting rounded-xl bg-white/80 hover:bg-stone-100 border-stone-300 hover:border-stone-400 text-stone-700 hover:text-stone-900 shadow-sm">
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-red-600 hover:bg-red-700 text-white cursor-pointer handwriting rounded-xl shadow-sm"
+                    onClick={() => {
+                      clearMonth();
+                      setClearDialogOpen(false);
+                    }}
+                  >
+                    <Trash className="w-4 h-4 mr-1" />
+                    Clear All Data
+                  </Button>
+                </div>
+                </div>
               </div>
             </div>
           </DialogContent>
         </Dialog>
 
         {/* quick summary */}
-        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scale-cards">
+        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
           <SummaryCard title="Starting cash" value={budget} />
           <SummaryCard title="Spent so far" value={totalSpent} red />
           <SummaryCard title="Planned so far" value={totalPlanned} />
@@ -376,7 +386,7 @@ export default function PaperBudget() {
       </div>
 
       {/* layout: calendar + planner */}
-      <div className={`mx-auto max-w-6xl px-2 sm:px-4 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab} scale-content`}>
+      <div className={`mx-auto max-w-6xl px-2 sm:px-4 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab}`}>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start h-full lg:h-auto">
           {/* Calendar - show on mobile only when calendar tab active, always show on desktop */}
           <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col" data-mobile-view="calendar">

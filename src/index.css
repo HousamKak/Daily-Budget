@@ -55,53 +55,53 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     margin: 0;
-    min-height: 100vh;
+    min-height: 100dvh;
     font-family: system-ui, -apple-system, sans-serif;
   }
 
-  /* Granular scaling utilities for individual elements */
-  .scale-content {
-    transform: scale(0.85);
-    transform-origin: top center;
-    max-height: 85vh;
-    overflow: visible;
-    padding-bottom: 2rem; /* Space for content at bottom */
+  /* Handwriting font utility */
+  .handwriting {
+    font-family: "Patrick Hand", "Comic Sans MS", cursive;
   }
 
-  .scale-header {
-    transform: scale(0.88);
-    transform-origin: top center;
+  /* Stable date input for consistent picker behavior */
+  .date-input-stable {
+    transform: none !important;
   }
 
-  .scale-calendar {
-    transform: scale(0.85);
-    transform-origin: top center;
-  }
-
-  .scale-planner {
-    transform: scale(0.85);
-    transform-origin: top center;
-  }
-
-  .scale-cards {
-    transform: scale(0.88);
-    transform-origin: center;
-  }
-
-  .scale-buttons {
-    transform: scale(0.92);
-    transform-origin: center;
-  }
-
+  /* TEMP: neutralize all the scale-utility classes if still present in markup */
+  .scale-content,
+  .scale-header,
+  .scale-calendar,
+  .scale-planner,
+  .scale-cards,
+  .scale-buttons,
   .scale-modal {
-    transform: scale(1.0);
-    transform-origin: center;
+    transform: none !important;
   }
 
-  /* No-scroll container */
+  /* Responsive sizing without transforms */
+  :root {
+    --title-size: clamp(1.25rem, 2.5vw + 0.5rem, 2rem);
+  }
+
+  .page-shell {
+    padding-inline: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .page-title {
+    font-size: var(--title-size);
+  }
+
+  .section-gap {
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+  }
+
+  /* Better scrolling container */
   .no-scroll-container {
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100dvh;
+    overflow-x: clip;
+    overflow-y: auto;
   }
 
   /* Apple/iOS style hover and selection effects */
@@ -160,7 +160,7 @@
     transition: all 0.3s ease;
     z-index: 50;
     cursor: pointer;
-    pointer-events: auto;
+    pointer-events: none;
   }
 
   .today-sticker:hover {
@@ -222,6 +222,21 @@
   /* Smooth scroll behavior */
   * {
     scroll-behavior: smooth;
+  }
+
+  /* Motion safety for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .apple-hover,
+    .apple-button,
+    .apple-card,
+    .calendar-day,
+    .ios-grow {
+      transition: none !important;
+      transform: none !important;
+    }
+    * {
+      scroll-behavior: auto !important;
+    }
   }
 
   /* Apple-style glassy scrollbar */

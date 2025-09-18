@@ -102,10 +102,7 @@ export function Calendar({
                 <div className={calendarStyles.dayTornEdge} />
                 <div className="p-0.5 xs:p-1 sm:p-2 md:p-3 h-full flex flex-col items-start">
                   <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-2">
-                    <span
-                      className="text-xs xs:text-sm sm:text-lg md:text-xl font-bold"
-                      style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
-                    >
+                    <span className="text-xs xs:text-sm sm:text-lg md:text-xl font-bold handwriting">
                       {d}
                     </span>
                   </div>
