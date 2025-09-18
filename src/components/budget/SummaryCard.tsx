@@ -1,4 +1,3 @@
-import React from "react";
 import { summaryCardStyles } from "@/styles/components/summary-card";
 import { cn, variant, conditional } from "@/styles";
 

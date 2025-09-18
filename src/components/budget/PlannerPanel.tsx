@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash } from "./Icons";
 import { CATEGORIES } from "./constants";
-import { makeId, monStartOffset, daysInMonth, weekIndexOf } from "./utils";
+import { monStartOffset, daysInMonth, weekIndexOf } from "./utils";
 import type { Expense, PlanItem } from "@/lib/data-service";
 
 interface PlannerPanelProps {

@@ -1,7 +1,5 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getRandomQuote } from "./constants";
 import { dialogStyles } from "@/styles";
 
 interface QuoteModalProps {
