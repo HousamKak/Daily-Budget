@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash, CalendarIcon } from "./Icons";
 import { CATEGORIES } from "./constants";
@@ -83,6 +82,12 @@ export function DraftView({
     onRemoveDraftItem(item.id);
   }
 
+  // Auto-convert draft to plan when all required fields are present
+  function checkAutoConvert(item: DraftItem) {
+    // Removed auto-conversion - user must manually click Plan button
+    return;
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -106,6 +111,17 @@ export function DraftView({
             flex: '1 1 0',
             minWidth: '0'
           }}
+        />
+
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          value={quickAmount}
+          onChange={(e) => setQuickAmount(e.target.value)}
+          placeholder="0.00"
+          className="text-xs text-right bg-white/80 border-2 border-amber-200 rounded-xl shadow-sm"
+          style={{ width: '70px', height: '40px', flexShrink: 0 }}
         />
 
         <Select value={quickCategory} onValueChange={setQuickCategory}>
@@ -153,17 +169,6 @@ export function DraftView({
           <CalendarIcon className="w-4 h-4 text-stone-600 pointer-events-none" />
         </div>
 
-        <Input
-          type="number"
-          step="0.01"
-          min="0"
-          value={quickAmount}
-          onChange={(e) => setQuickAmount(e.target.value)}
-          placeholder="0.00"
-          className="text-xs text-right bg-white/80 border-2 border-amber-200 rounded-xl shadow-sm"
-          style={{ width: '70px', height: '40px', flexShrink: 0 }}
-        />
-
         <Button
           onClick={addDraftItem}
           className="p-0 bg-white/80 hover:bg-white text-stone-700 border-2 border-amber-200 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer"
@@ -182,69 +187,99 @@ export function DraftView({
             </h3>
           </div>
 
-          {draftItems.map((item) => (
-            <div key={item.id} className="rounded-lg border border-stone-200 bg-white p-2.5 text-sm">
-              {/* First line: Amount, Category, Action buttons */}
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="flex items-center gap-3">
-                  <div className="font-bold text-stone-900">
-                    {item.amount ? `$${item.amount.toFixed(2)}` : "--"}
-                  </div>
-                  <div className="text-stone-600">{item.category || "uncategorized"}</div>
-                  {item.note && <div className="text-xs text-stone-500 truncate max-w-24">• {item.note}</div>}
-                </div>
-                <div className="flex items-center gap-1">
-                  {(!item.amount || item.amount <= 0) ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        // Quick edit: prompt for amount
-                        const amount = prompt("Enter amount:");
-                        if (amount && Number(amount) > 0) {
-                          onUpdateDraftItem(item.id, { amount: Number(amount) });
-                        }
-                      }}
-                      className="h-6 px-2 text-xs cursor-pointer"
-                    >
-                      Set Amount
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => addToPlanner(item)}
-                      disabled={!item.date}
-                      className="h-6 px-2 text-xs cursor-pointer disabled:cursor-not-allowed"
-                      title={!item.date ? "Specify a day first" : "Mark as paid"}
-                    >
-                      Mark paid
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 hover:bg-red-50 cursor-pointer"
-                    onClick={() => onRemoveDraftItem(item.id)}
-                    title="Delete"
-                  >
-                    <Trash className="w-3 h-3 text-red-500" />
-                  </Button>
-                </div>
+          <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+            {draftItems.map((item) => (
+            <div key={item.id} className="group flex items-center gap-2 p-2 rounded-lg border border-stone-200 bg-white hover:shadow-sm transition-shadow">
+
+              {/* Note */}
+              <div className="flex-1 min-w-0 text-xs leading-normal text-stone-900 break-words line-clamp-2">
+                {item.note}
               </div>
-              {/* Second line: Date input */}
-              <div className="flex items-center gap-2">
-                <Label className="text-xs opacity-70 min-w-fit">Day:</Label>
+
+              {/* Amount */}
+              <div className="flex-shrink-0 w-16">
                 <Input
-                  className="h-6 flex-1 text-xs date-input-stable"
-                  type="date"
-                  value={item.date || ""}
-                  onChange={(e) => onUpdateDraftItem(item.id, { date: e.target.value })}
-                  autoComplete="off"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={item.amount || ""}
+                  onChange={(e) => {
+                    const value = e.target.value ? Number(e.target.value) : undefined;
+                    const updatedItem = { ...item, amount: value };
+                    onUpdateDraftItem(item.id, { amount: value });
+                    if (value) checkAutoConvert(updatedItem);
+                  }}
+                  placeholder="0.00"
+                  className="w-full h-7 text-xs text-right text-blue-600 font-bold border-stone-300 hover:border-stone-400 focus:border-amber-400 transition-colors placeholder:text-stone-400 placeholder:font-normal cursor-pointer"
                 />
               </div>
+
+              {/* Category */}
+              <Select
+                value={item.category || ""}
+                onValueChange={(value) => {
+                  const updatedItem = { ...item, category: value };
+                  onUpdateDraftItem(item.id, { category: value });
+                  checkAutoConvert(updatedItem);
+                }}
+              >
+                <SelectTrigger className="w-20 h-7 text-xs border-stone-300 hover:border-stone-400 transition-colors flex-shrink-0">
+                  <SelectValue placeholder="Cat" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Date */}
+              <div className="relative flex-shrink-0">
+                <input
+                  type="date"
+                  value={item.date || ""}
+                  onChange={(e) => {
+                    const updatedItem = { ...item, date: e.target.value };
+                    onUpdateDraftItem(item.id, { date: e.target.value });
+                    checkAutoConvert(updatedItem);
+                  }}
+                  className="w-20 h-7 text-xs border border-stone-300 hover:border-stone-400 focus:border-amber-400 transition-colors rounded-md px-2 pr-6 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  style={{ colorScheme: 'light' }}
+                  autoComplete="off"
+                />
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-2">
+                  <span className="text-xs text-stone-900">
+                    {item.date ? new Date(item.date + 'T00:00:00').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) : ''}
+                  </span>
+                  <CalendarIcon className="w-3 h-3 text-stone-400 ml-1" />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                <Button
+                  size="sm"
+                  onClick={() => addToPlanner(item)}
+                  disabled={!item.amount || !item.date}
+                  className="h-7 px-2 text-xs bg-white hover:bg-amber-50 text-stone-700 border-2 border-amber-200 hover:border-amber-300 disabled:bg-stone-50 disabled:text-stone-400 disabled:border-stone-200 disabled:hover:bg-stone-50 transition-all cursor-pointer disabled:cursor-not-allowed"
+                >
+                  Plan
+                </Button>
+
+                <button
+                  onClick={() => onRemoveDraftItem(item.id)}
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all cursor-pointer"
+                  title="Delete"
+                >
+                  <Trash className="w-3 h-3 text-red-400" />
+                </button>
+              </div>
+
             </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

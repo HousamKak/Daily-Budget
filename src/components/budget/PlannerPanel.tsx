@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CalendarIcon } from "./Icons";
 import { weekIndexOf } from "./utils";
 import { DraftView } from "./DraftView";
 import { WeekView } from "./WeekView";
 import { MonthView } from "./MonthView";
-import type { Expense, PlanItem } from "@/lib/data-service";
+import { dataService, type Expense, type PlanItem, type DraftItem } from "@/lib/data-service";
 
 interface PlannerPanelProps {
   year: number;
@@ -19,14 +19,6 @@ interface PlannerPanelProps {
   onUpdate: (id: string, patch: Partial<PlanItem>) => void;
   onRemove: (id: string) => void;
   onMarkPaid: (p: PlanItem) => void;
-}
-
-interface DraftItem {
-  id: string;
-  note: string;
-  amount?: number;
-  category?: string;
-  date?: string;
 }
 
 export function PlannerPanel({
@@ -46,6 +38,19 @@ export function PlannerPanel({
   const [viewMode, setViewMode] = useState<'draft' | 'week' | 'month'>('draft');
   const [draftItems, setDraftItems] = useState<DraftItem[]>([]);
 
+  // Load drafts from database on mount
+  useEffect(() => {
+    async function loadDrafts() {
+      try {
+        const drafts = await dataService.getDrafts();
+        setDraftItems(drafts);
+      } catch (error) {
+        console.error('Failed to load drafts:', error);
+      }
+    }
+    loadDrafts();
+  }, []);
+
   function handleAddFromDraft(item: Omit<PlanItem, "id" | "monthKey" | "weekIndex">) {
     let wk = todaysWeek;
     if (item.targetDate) {
@@ -61,22 +66,37 @@ export function PlannerPanel({
     });
   }
 
-  function addDraftItem(item: Omit<DraftItem, "id">) {
-    const newItem: DraftItem = {
-      ...item,
-      id: Date.now().toString(),
-    };
-    setDraftItems(prev => [...prev, newItem]);
+  async function addDraftItem(item: Omit<DraftItem, "id">) {
+    try {
+      const newItem: DraftItem = {
+        ...item,
+        id: crypto.randomUUID(),
+      };
+      await dataService.addDraft(newItem);
+      setDraftItems(prev => [...prev, newItem]);
+    } catch (error) {
+      console.error('Failed to add draft:', error);
+    }
   }
 
-  function updateDraftItem(id: string, updates: Partial<DraftItem>) {
-    setDraftItems(prev => prev.map(item =>
-      item.id === id ? { ...item, ...updates } : item
-    ));
+  async function updateDraftItem(id: string, updates: Partial<DraftItem>) {
+    try {
+      await dataService.updateDraft(id, updates);
+      setDraftItems(prev => prev.map(item =>
+        item.id === id ? { ...item, ...updates } : item
+      ));
+    } catch (error) {
+      console.error('Failed to update draft:', error);
+    }
   }
 
-  function removeDraftItem(id: string) {
-    setDraftItems(prev => prev.filter(item => item.id !== id));
+  async function removeDraftItem(id: string) {
+    try {
+      await dataService.removeDraft(id);
+      setDraftItems(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Failed to remove draft:', error);
+    }
   }
 
   return (
