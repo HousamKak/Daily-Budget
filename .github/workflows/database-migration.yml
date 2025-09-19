@@ -50,7 +50,7 @@ jobs:
       - name: Run database migrations
         run: |
           echo "Running migrations..."
-          supabase db push --linked
+          supabase db push --linked --debug
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -59,9 +59,10 @@ jobs:
         run: |
           echo "Generating TypeScript types..."
           mkdir -p src/types
-          supabase gen types typescript --linked > src/types/database.types.ts
+          supabase gen types typescript --linked --debug > src/types/database.types.ts
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
       - name: Commit generated types
         run: |
