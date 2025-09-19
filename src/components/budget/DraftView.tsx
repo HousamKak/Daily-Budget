@@ -163,7 +163,7 @@ export function DraftView({
       </div>
 
       {/* Draft Items List */}
-      {draftItems.length > 0 && (
+      {draftItems.length > 0 ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-stone-700 handwriting" style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}>
@@ -254,6 +254,49 @@ export function DraftView({
 
             </div>
             ))}
+          </div>
+        </div>
+      ) : (
+        // Empty state with pen and paper doodle
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <div className="opacity-60">
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Paper */}
+              <path
+                d="M25 25 L85 20 L90 85 L30 90 Z"
+                fill="#fefefe"
+                stroke="#d6d3d1"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Paper lines */}
+              <path d="M35 35 L75 33" stroke="#e7e5e4" strokeWidth="1" strokeLinecap="round" strokeDasharray="2,2" />
+              <path d="M35 45 L75 43" stroke="#e7e5e4" strokeWidth="1" strokeLinecap="round" strokeDasharray="2,2" />
+              <path d="M35 55 L75 53" stroke="#e7e5e4" strokeWidth="1" strokeLinecap="round" strokeDasharray="2,2" />
+              <path d="M35 65 L75 63" stroke="#e7e5e4" strokeWidth="1" strokeLinecap="round" strokeDasharray="2,2" />
+
+              {/* Small doodle marks */}
+              <circle cx="45" cy="40" r="1" fill="#fbbf24" opacity="0.7" />
+              <path d="M52 48 Q55 46 58 48" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.7" />
+              <circle cx="42" cy="58" r="0.8" fill="#fbbf24" opacity="0.7" />
+            </svg>
+          </div>
+
+          <div className="text-center space-y-2">
+            <p
+              className="text-stone-500 text-lg handwriting"
+              style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+            >
+              Your draft pad is empty
+            </p>
+            <p
+              className="text-stone-400 text-sm handwriting"
+              style={{ fontFamily: '"Patrick Hand", "Comic Sans MS", cursive' }}
+            >
+              Start planning by adding an expense
+            </p>
           </div>
         </div>
       )}
