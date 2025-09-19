@@ -3,7 +3,6 @@ import { PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
 import type { CategoryAnalytics } from '@/utils/analytics';
 import { CategoryPieChart } from './CategoryPieChart';
 import { CategoryBarChart } from './CategoryBarChart';
-import { paperTheme } from '@/styles';
 
 interface CategoryToggleChartProps {
   data: CategoryAnalytics[];

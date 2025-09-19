@@ -71,9 +71,9 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
         <Legend
           verticalAlign="bottom"
           height={36}
-          formatter={(value, entry) => (
+          formatter={(value, entry: any) => (
             <span className={`${paperTheme.fonts.handwriting} text-sm ${paperTheme.colors.text.secondary}`}>
-              {entry.payload.category}
+              {entry?.payload?.category || value}
             </span>
           )}
         />

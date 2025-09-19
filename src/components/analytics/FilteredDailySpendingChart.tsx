@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Filter, TrendingUp } from 'lucide-react';
 import type { Expense } from '@/lib/data-service';
-import type { DailySpending } from '@/utils/analytics';
 import { chartColors, formatCurrency } from '@/utils/analytics';
 import { paperTheme } from '@/styles';
 
