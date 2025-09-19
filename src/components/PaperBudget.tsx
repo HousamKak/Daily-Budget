@@ -46,6 +46,8 @@ export default function PaperBudget() {
   // Mobile: bottom tabs to switch between calendar/planner
   const [activeTab, setActiveTab] = useState<'calendar' | 'planner'>('calendar');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  // Plan animation state - tracks which dates should show animation (supports multiple simultaneous)
+  const [animatedPlanDates, setAnimatedPlanDates] = useState<Set<string>>(new Set());
 
   // Debounce the budget input to avoid excessive API calls
   const debouncedBudgetInput = useDebounce(budgetInput, 800);
@@ -176,6 +178,21 @@ export default function PaperBudget() {
     const date = p.targetDate || ymd(new Date());
     addExpense({ id: makeId(), date, amount: p.amount, category: p.category, note: p.note });
     removePlan(p.id);
+  }
+
+  // Handle plan animation - shows blue glow on calendar day (supports multiple simultaneous)
+  function handlePlanAnimation(targetDate: string) {
+    // Add the date to the animated set
+    setAnimatedPlanDates(prev => new Set([...prev, targetDate]));
+
+    // Remove this specific date after animation completes (2.5s)
+    setTimeout(() => {
+      setAnimatedPlanDates(prev => {
+        const next = new Set(prev);
+        next.delete(targetDate);
+        return next;
+      });
+    }, 2500);
   }
 
   // add-expense dialog state (compact)
@@ -393,6 +410,7 @@ export default function PaperBudget() {
               budget={budget}
               expenses={expenses}
               plans={plans}
+              animatedPlanDates={animatedPlanDates}
               onDayClick={(dateString) => {
                 setFormDate(dateString);
                 setOpen(true);
@@ -419,6 +437,7 @@ export default function PaperBudget() {
               onUpdate={updatePlan}
               onRemove={removePlan}
               onMarkPaid={markPlanPaid}
+              onPlanAnimation={handlePlanAnimation}
             />
           </div>
         </div>

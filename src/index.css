@@ -385,6 +385,29 @@
 
 /* ==== MOBILE-ONLY ADDITIONS (safe for desktop) ==== */
 @layer base {
+  /* Plan glow animation */
+  @keyframes plan-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+    }
+    25% {
+      box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.3), 0 0 20px rgba(37, 99, 235, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 0 12px rgba(37, 99, 235, 0.25), 0 0 30px rgba(37, 99, 235, 0.15);
+    }
+    75% {
+      box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.2), 0 0 20px rgba(37, 99, 235, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    }
+  }
+
+  .animate-plan-glow {
+    animation: plan-glow 2.5s ease-out;
+  }
+
   /* Better rendering on small screens */
   body {
     -webkit-font-smoothing: antialiased;

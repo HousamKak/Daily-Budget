@@ -19,6 +19,7 @@ interface PlannerPanelProps {
   onUpdate: (id: string, patch: Partial<PlanItem>) => void;
   onRemove: (id: string) => void;
   onMarkPaid: (p: PlanItem) => void;
+  onPlanAnimation?: (targetDate: string) => void;
 }
 
 export function PlannerPanel({
@@ -34,6 +35,7 @@ export function PlannerPanel({
   onUpdate,
   onRemove,
   onMarkPaid,
+  onPlanAnimation,
 }: PlannerPanelProps) {
   const [viewMode, setViewMode] = useState<'draft' | 'week' | 'month'>('draft');
   const [draftItems, setDraftItems] = useState<DraftItem[]>([]);
@@ -64,6 +66,11 @@ export function PlannerPanel({
       weekIndex: wk,
       amount: Number(item.amount.toFixed(2))
     });
+
+    // Trigger animation for the target date
+    if (item.targetDate && onPlanAnimation) {
+      onPlanAnimation(item.targetDate);
+    }
   }
 
   async function addDraftItem(item: Omit<DraftItem, "id">) {
