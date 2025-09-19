@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash, CalendarIcon } from "./Icons";
 import { CATEGORIES } from "./constants";
-import { makeId } from "./utils";
 import type { PlanItem } from "@/lib/data-service";
 
 interface DraftItem {
@@ -151,14 +150,7 @@ export function DraftView({
               zIndex: 10
             }}
           />
-          <CalendarIcon
-            className="text-stone-600"
-            style={{
-              width: '16px',
-              height: '16px',
-              pointerEvents: 'none'
-            }}
-          />
+          <CalendarIcon className="w-4 h-4 text-stone-600 pointer-events-none" />
         </div>
 
         <Input
