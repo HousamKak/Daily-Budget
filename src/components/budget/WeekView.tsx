@@ -72,9 +72,6 @@ export function WeekView({
     return { spent, planned, weekExpenses, weekPlans };
   }
 
-  function moveToNextWeek(id: string) {
-    onUpdate(id, { weekIndex: Math.min(weekIndex + 1, weekCount - 1) });
-  }
 
   const currentSummary = getWeekSummary(weekIndex);
 
@@ -217,15 +214,6 @@ function WeekList({
                   title={!p.targetDate ? "Specify a day first" : "Mark as paid"}
                 >
                   Mark paid
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 hover:bg-amber-50 cursor-pointer"
-                  onClick={() => onMoveNext(p.id)}
-                  title="Move to next week"
-                >
-                  <ChevronRight className="h-3 w-3" />
                 </Button>
                 <Button
                   size="sm"
