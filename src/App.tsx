@@ -4,10 +4,13 @@ import PaperBudget from './components/PaperBudget'
 import Analytics from './components/Analytics'
 import { NavigationPanel } from './components/NavigationPanel'
 
+// Get the base path from Vite config
+const basename = import.meta.env.MODE === 'production' ? '/Daily-Budget' : ''
+
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={basename}>
         <div className="relative">
           <NavigationPanel />
           <Routes>
