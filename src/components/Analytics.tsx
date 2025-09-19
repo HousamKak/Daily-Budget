@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, PieChart, TrendingUp, Calendar, DollarSign, Target } from "lucide-react";
+import { TrendingUp, Calendar, DollarSign, Target } from "lucide-react";
 import { layoutStyles, paperTheme } from "@/styles";
 import { dataService, type Expense } from "@/lib/data-service";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,8 +12,8 @@ import {
   formatCurrency,
   formatPercentage
 } from "@/utils/analytics";
-import { CategoryPieChart } from "./analytics/CategoryPieChart";
-import { CategoryBarChart } from "./analytics/CategoryBarChart";
+import { CategoryToggleChart } from "./analytics/CategoryToggleChart";
+import { FilteredDailySpendingChart } from "./analytics/FilteredDailySpendingChart";
 import { DailySpendingChart } from "./analytics/DailySpendingChart";
 import { BudgetPerformanceChart } from "./analytics/BudgetPerformanceChart";
 import { monthKey } from "./budget/utils";
@@ -157,29 +157,21 @@ export default function Analytics() {
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-          {/* Category Pie Chart */}
+          {/* Category Toggle Chart */}
           <div className={`relative ${paperTheme.colors.background.cardGradient} ${paperTheme.colors.borders.paper} ${paperTheme.radius.lg} p-6 ${paperTheme.effects.shadow.xl} overflow-hidden`}>
             <div className={`absolute inset-0 opacity-15 ${paperTheme.effects.paperTexture} ${paperTheme.radius.lg} pointer-events-none`}></div>
             <div className={`absolute -top-2 left-1/2 -translate-x-1/2 w-16 h-6 ${paperTheme.effects.yellowTape}`}></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <PieChart className="w-8 h-8 text-amber-600" />
-                <h2 className="text-xl font-bold text-stone-800 handwriting">Spending by Category</h2>
-              </div>
-              <CategoryPieChart data={categoryAnalytics} />
+              <CategoryToggleChart data={categoryAnalytics} />
             </div>
           </div>
 
-          {/* Category Bar Chart */}
+          {/* Filtered Daily Spending Chart */}
           <div className={`relative ${paperTheme.colors.background.cardGradient} ${paperTheme.colors.borders.paper} ${paperTheme.radius.lg} p-6 ${paperTheme.effects.shadow.xl} overflow-hidden`}>
             <div className={`absolute inset-0 opacity-15 ${paperTheme.effects.paperTexture} ${paperTheme.radius.lg} pointer-events-none`}></div>
             <div className={`absolute -top-2 left-1/2 -translate-x-1/2 w-16 h-6 ${paperTheme.effects.yellowTape}`}></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <BarChart3 className="w-8 h-8 text-amber-600" />
-                <h2 className="text-xl font-bold text-stone-800 handwriting">Category Totals</h2>
-              </div>
-              <CategoryBarChart data={categoryAnalytics} />
+              <FilteredDailySpendingChart expenses={expenses} />
             </div>
           </div>
 
