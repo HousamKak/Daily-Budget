@@ -67,6 +67,9 @@ export default function PaperBudget() {
         setPlans(plansData);
       } catch (error) {
         console.error('Failed to load data:', error);
+        // Still set the input and flag even on error to prevent stale values
+        setBudgetInput("");
+        setHasLoadedData(true);
       }
     };
     loadData();
@@ -74,14 +77,21 @@ export default function PaperBudget() {
 
   // Handle debounced budget updates (only after data has loaded)
   useEffect(() => {
-    // Only process debounced updates if data has loaded and the input has a value and it's different from current budget
-    if (hasLoadedData && debouncedBudgetInput !== "" && debouncedBudgetInput !== budget.toString()) {
+    // Only process debounced updates if:
+    // 1. Data has loaded for this month
+    // 2. Input has a value
+    // 3. Input is different from current budget
+    // 4. Input matches the current budget input (to ensure it's for the current month)
+    if (hasLoadedData &&
+        debouncedBudgetInput !== "" &&
+        debouncedBudgetInput !== budget.toString() &&
+        debouncedBudgetInput === budgetInput) {
       const numericValue = Number(debouncedBudgetInput);
       if (!isNaN(numericValue) && numericValue >= 0) {
         setBudget(numericValue);
       }
     }
-  }, [debouncedBudgetInput, budget, hasLoadedData]);
+  }, [debouncedBudgetInput, budget, hasLoadedData, budgetInput]);
 
   // totals
   const totalSpent = useMemo(() => expenses.reduce((s, e) => s + e.amount, 0), [expenses]);
@@ -229,20 +239,6 @@ export default function PaperBudget() {
         </div>
       )}
 
-      {/* Beta badge (hide on small) */}
-      <div className={layoutStyles.notifications.betaBadge}>
-        <div className={layoutStyles.notifications.betaBadgeWrapper}>
-          {/* Paper texture overlay */}
-          <div className={layoutStyles.notifications.betaBadgeTexture}></div>
-          <div className="relative">
-            <span className="text-xl font-bold text-stone-800 tracking-wide handwriting">
-              BETA
-            </span>
-          </div>
-        </div>
-        {/* Tape effect */}
-        <div className={layoutStyles.notifications.betaBadgeTape}></div>
-      </div>
 
       {/* top bar (slightly tighter on mobile) */}
       <div className="mx-auto max-w-7xl px-1 sm:px-2 pt-4 sm:pt-6 pb-3">
