@@ -148,7 +148,6 @@ export function WeekView({
           <div className="max-h-96 overflow-y-auto">
             <WeekList
               items={thisWeekItems}
-              onMoveNext={moveToNextWeek}
               onUpdate={onUpdate}
               onRemove={onRemove}
               onMarkPaid={onMarkPaid}
@@ -166,7 +165,6 @@ export function WeekView({
           <div className="space-y-2">
             <WeekList
               items={thisWeekItems}
-              onMoveNext={moveToNextWeek}
               onUpdate={onUpdate}
               onRemove={onRemove}
               onMarkPaid={onMarkPaid}
@@ -180,13 +178,11 @@ export function WeekView({
 
 function WeekList({
   items,
-  onMoveNext,
   onUpdate,
   onRemove,
   onMarkPaid,
 }: {
   items: PlanItem[];
-  onMoveNext: (id: string) => void;
   onUpdate: (id: string, patch: Partial<PlanItem>) => void;
   onRemove: (id: string) => void;
   onMarkPaid: (p: PlanItem) => void;
