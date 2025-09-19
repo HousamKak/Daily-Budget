@@ -83,7 +83,7 @@ export function DraftView({
   }
 
   // Auto-convert draft to plan when all required fields are present
-  function checkAutoConvert(item: DraftItem) {
+  function checkAutoConvert() {
     // Removed auto-conversion - user must manually click Plan button
     return;
   }
@@ -205,9 +205,8 @@ export function DraftView({
                   value={item.amount || ""}
                   onChange={(e) => {
                     const value = e.target.value ? Number(e.target.value) : undefined;
-                    const updatedItem = { ...item, amount: value };
                     onUpdateDraftItem(item.id, { amount: value });
-                    if (value) checkAutoConvert(updatedItem);
+                    if (value) checkAutoConvert();
                   }}
                   placeholder="0.00"
                   className="w-full h-7 text-xs text-right text-blue-600 font-bold border-stone-300 hover:border-stone-400 focus:border-amber-400 transition-colors placeholder:text-stone-400 placeholder:font-normal cursor-pointer"
@@ -218,9 +217,8 @@ export function DraftView({
               <Select
                 value={item.category || ""}
                 onValueChange={(value) => {
-                  const updatedItem = { ...item, category: value };
                   onUpdateDraftItem(item.id, { category: value });
-                  checkAutoConvert(updatedItem);
+                  checkAutoConvert();
                 }}
               >
                 <SelectTrigger className="w-20 h-7 text-xs border-stone-300 hover:border-stone-400 transition-colors flex-shrink-0">
@@ -241,9 +239,8 @@ export function DraftView({
                   type="date"
                   value={item.date || ""}
                   onChange={(e) => {
-                    const updatedItem = { ...item, date: e.target.value };
                     onUpdateDraftItem(item.id, { date: e.target.value });
-                    checkAutoConvert(updatedItem);
+                    checkAutoConvert();
                   }}
                   className="w-20 h-7 text-xs border border-stone-300 hover:border-stone-400 focus:border-amber-400 transition-colors rounded-md px-2 pr-6 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
                   style={{ colorScheme: 'light' }}
