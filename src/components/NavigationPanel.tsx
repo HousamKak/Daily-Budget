@@ -1,7 +1,7 @@
 import { Home, BarChart3 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { paperTheme, paperStyles } from "@/styles";
+import { paperTheme } from "@/styles";
 
 /**
  * Small navigation panel toolkit on the left side of the screen
