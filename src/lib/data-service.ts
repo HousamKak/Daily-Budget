@@ -19,16 +19,25 @@ export type PlanItem = {
   targetDate?: string
 }
 
+export type DraftItem = {
+  id: string
+  note: string
+  amount?: number
+  category?: string
+  date?: string
+}
+
 export type Store = {
   budgets: Record<string, number>
   expenses: Record<string, Expense[]>
   plans: Record<string, PlanItem[]>
+  drafts: DraftItem[]
 }
 
 // LocalStorage fallback
 const STORAGE_KEY = "paper-budget-cartoon-v1"
 
-const defaultStore: Store = { budgets: {}, expenses: {}, plans: {} }
+const defaultStore: Store = { budgets: {}, expenses: {}, plans: {}, drafts: [] }
 
 function loadStoreFromLocalStorage(): Store {
   try {
@@ -39,6 +48,7 @@ function loadStoreFromLocalStorage(): Store {
       budgets: parsed.budgets ?? {},
       expenses: parsed.expenses ?? {},
       plans: parsed.plans ?? {},
+      drafts: parsed.drafts ?? [],
     }
   } catch {
     return { ...defaultStore }
@@ -386,6 +396,145 @@ export class DataService {
     this.localStore.budgets[monthKey] = 0
     this.localStore.expenses[monthKey] = []
     this.localStore.plans[monthKey] = []
+    saveStoreToLocalStorage(this.localStore)
+  }
+
+  // Draft operations
+  async getDrafts(): Promise<DraftItem[]> {
+    if (this.useSupabase && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('drafts')
+          .select('*')
+          .order('created_at', { ascending: true })
+
+        if (error) {
+          console.error('Supabase drafts fetch error:', error)
+          throw error
+        }
+        console.log('Drafts loaded from Supabase:', data?.length || 0, 'items')
+        return data?.map(row => ({
+          id: row.id,
+          note: row.note,
+          amount: row.amount ? Number(row.amount) : undefined,
+          category: row.category || undefined,
+          date: row.date || undefined,
+        })) || []
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+        return this.localStore.drafts ?? []
+      }
+    }
+
+    return this.localStore.drafts ?? []
+  }
+
+  async addDraft(draft: DraftItem): Promise<void> {
+    if (this.useSupabase && supabase) {
+      try {
+        const user = await this.getCurrentUser()
+        if (!user) {
+          console.warn('User not authenticated, falling back to localStorage')
+          this.useSupabase = false
+        } else {
+          const { error } = await supabase
+            .from('drafts')
+            .insert({
+              id: draft.id,
+              user_id: user.id,
+              note: draft.note,
+              amount: draft.amount,
+              category: draft.category,
+              date: draft.date,
+            })
+
+          if (error) {
+            console.error('Supabase drafts insert error:', error)
+            throw error
+          }
+          console.log('Draft successfully saved to Supabase:', draft.id)
+          return
+        }
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    const list = [...this.localStore.drafts]
+    list.push(draft)
+    this.localStore.drafts = list
+    saveStoreToLocalStorage(this.localStore)
+  }
+
+  async updateDraft(id: string, updates: Partial<DraftItem>): Promise<void> {
+    if (this.useSupabase && supabase) {
+      try {
+        const dbUpdates: any = {}
+        if (updates.note !== undefined) dbUpdates.note = updates.note
+        if (updates.amount !== undefined) dbUpdates.amount = updates.amount
+        if (updates.category !== undefined) dbUpdates.category = updates.category
+        if (updates.date !== undefined) dbUpdates.date = updates.date
+
+        const { error } = await supabase
+          .from('drafts')
+          .update(dbUpdates)
+          .eq('id', id)
+
+        if (error) throw error
+        return
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    const list = this.localStore.drafts.map((x) =>
+      x.id === id ? { ...x, ...updates } : x
+    )
+    this.localStore.drafts = list
+    saveStoreToLocalStorage(this.localStore)
+  }
+
+  async removeDraft(id: string): Promise<void> {
+    if (this.useSupabase && supabase) {
+      try {
+        const { error } = await supabase
+          .from('drafts')
+          .delete()
+          .eq('id', id)
+
+        if (error) throw error
+        return
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    const list = this.localStore.drafts.filter((x) => x.id !== id)
+    this.localStore.drafts = list
+    saveStoreToLocalStorage(this.localStore)
+  }
+
+  async clearAllDrafts(): Promise<void> {
+    if (this.useSupabase && supabase) {
+      try {
+        const { error } = await supabase
+          .from('drafts')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all
+
+        if (error) throw error
+        return
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    this.localStore.drafts = []
     saveStoreToLocalStorage(this.localStore)
   }
 }
