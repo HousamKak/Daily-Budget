@@ -229,20 +229,6 @@ export default function PaperBudget() {
         </div>
       )}
 
-      {/* Beta badge (hide on small) */}
-      <div className={layoutStyles.notifications.betaBadge}>
-        <div className={layoutStyles.notifications.betaBadgeWrapper}>
-          {/* Paper texture overlay */}
-          <div className={layoutStyles.notifications.betaBadgeTexture}></div>
-          <div className="relative">
-            <span className="text-xl font-bold text-stone-800 tracking-wide handwriting">
-              BETA
-            </span>
-          </div>
-        </div>
-        {/* Tape effect */}
-        <div className={layoutStyles.notifications.betaBadgeTape}></div>
-      </div>
 
       {/* top bar (slightly tighter on mobile) */}
       <div className="mx-auto max-w-7xl px-1 sm:px-2 pt-4 sm:pt-6 pb-3">

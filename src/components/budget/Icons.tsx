@@ -62,3 +62,10 @@ export const Wallet = ({ className }: { className?: string }) => (
     <path d="M2 10h12" />
   </IconBase>
 );
+
+export const CheckCircle = ({ className }: { className?: string }) => (
+  <IconBase className={className}>
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
+  </IconBase>
+);
