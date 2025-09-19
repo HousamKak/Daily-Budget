@@ -25,8 +25,8 @@ import { monthKey } from "./budget/utils";
 export default function Analytics() {
   const { loading } = useAuth();
   const today = new Date();
-  const [year] = useState<number>(today.getFullYear());
-  const [month] = useState<number>(today.getMonth());
+  const [year, setYear] = useState<number>(today.getFullYear());
+  const [month, setMonth] = useState<number>(today.getMonth());
 
   const key = useMemo(() => monthKey(year, month), [year, month]);
   const [budget, setBudget] = useState<number>(0);
@@ -83,8 +83,45 @@ export default function Analytics() {
       <div className="mx-auto max-w-7xl px-1 sm:px-2 pt-4 sm:pt-6 pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-wide drop-shadow-[0_1px_0_rgba(0,0,0,0.1)] handwriting">
-            📊 Analytics Dashboard - {monthLabel}
+            📊 Analytics Dashboard
           </h1>
+
+          {/* Month/Year Selector */}
+          <div className="flex items-center gap-3">
+            <Calendar className="w-5 h-5 text-amber-600" />
+            <select
+              value={month}
+              onChange={(e) => setMonth(parseInt(e.target.value))}
+              className="px-3 py-2 text-sm rounded-md border border-amber-200 bg-white/80 handwriting text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i}>
+                  {new Date(year, i, 1).toLocaleString('default', { month: 'long' })}
+                </option>
+              ))}
+            </select>
+            <select
+              value={year}
+              onChange={(e) => setYear(parseInt(e.target.value))}
+              className="px-3 py-2 text-sm rounded-md border border-amber-200 bg-white/80 handwriting text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            >
+              {Array.from({ length: 5 }, (_, i) => {
+                const yearOption = today.getFullYear() - 2 + i;
+                return (
+                  <option key={yearOption} value={yearOption}>
+                    {yearOption}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
+
+        {/* Selected month label */}
+        <div className="mt-3">
+          <p className="text-base sm:text-lg text-stone-600 handwriting">
+            Viewing data for {monthLabel}
+          </p>
         </div>
       </div>
 
