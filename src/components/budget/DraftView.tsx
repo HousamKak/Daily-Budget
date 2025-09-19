@@ -37,24 +37,8 @@ export function DraftView({
   function addDraftItem() {
     if (!newItemNote.trim()) return;
 
-    // If we have amount, add directly to planner
+    // Always add to draft - items stay in draft until user clicks "Plan"
     const amount = quickAmount ? Number(quickAmount) : undefined;
-    if (amount && amount > 0) {
-      onAddToPlan({
-        note: newItemNote.trim(),
-        amount: amount,
-        category: quickCategory || "misc",
-        targetDate: quickDate || undefined,
-      });
-      // Clear form
-      setNewItemNote("");
-      setQuickAmount("");
-      setQuickCategory("");
-      setQuickDate("");
-      return;
-    }
-
-    // Otherwise add to draft
     onAddDraftItem({
       note: newItemNote.trim(),
       amount: amount,
@@ -70,13 +54,13 @@ export function DraftView({
   }
 
   function addToPlanner(item: DraftItem) {
-    if (!item.amount || item.amount <= 0) return;
+    if (!item.amount || item.amount <= 0 || !item.category || !item.date) return;
 
     onAddToPlan({
       amount: item.amount,
-      category: item.category || "misc",
+      category: item.category,
       note: item.note,
-      targetDate: item.date || undefined,
+      targetDate: item.date,
     });
 
     onRemoveDraftItem(item.id);
@@ -242,16 +226,10 @@ export function DraftView({
                     onUpdateDraftItem(item.id, { date: e.target.value });
                     checkAutoConvert();
                   }}
-                  className="w-20 h-7 text-xs border border-stone-300 hover:border-stone-400 focus:border-amber-400 transition-colors rounded-md px-2 pr-6 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  className="w-20 h-7 text-xs border border-stone-300 hover:border-stone-400 focus:border-amber-400 transition-colors rounded-md px-2 cursor-pointer"
                   style={{ colorScheme: 'light' }}
                   autoComplete="off"
                 />
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-2">
-                  <span className="text-xs text-stone-900">
-                    {item.date ? new Date(item.date + 'T00:00:00').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) : ''}
-                  </span>
-                  <CalendarIcon className="w-3 h-3 text-stone-400 ml-1" />
-                </div>
               </div>
 
               {/* Actions */}
@@ -259,7 +237,7 @@ export function DraftView({
                 <Button
                   size="sm"
                   onClick={() => addToPlanner(item)}
-                  disabled={!item.amount || !item.date}
+                  disabled={!item.amount || !item.date || !item.category}
                   className="h-7 px-2 text-xs bg-white hover:bg-amber-50 text-stone-700 border-2 border-amber-200 hover:border-amber-300 disabled:bg-stone-50 disabled:text-stone-400 disabled:border-stone-200 disabled:hover:bg-stone-50 transition-all cursor-pointer disabled:cursor-not-allowed"
                 >
                   Plan

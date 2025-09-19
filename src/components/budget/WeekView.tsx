@@ -72,9 +72,6 @@ export function WeekView({
     return { spent, planned, weekExpenses, weekPlans };
   }
 
-  function moveToNextWeek(id: string) {
-    onUpdate(id, { weekIndex: Math.min(weekIndex + 1, weekCount - 1) });
-  }
 
   const currentSummary = getWeekSummary(weekIndex);
 
@@ -151,7 +148,6 @@ export function WeekView({
           <div className="max-h-96 overflow-y-auto">
             <WeekList
               items={thisWeekItems}
-              onMoveNext={moveToNextWeek}
               onUpdate={onUpdate}
               onRemove={onRemove}
               onMarkPaid={onMarkPaid}
@@ -169,7 +165,6 @@ export function WeekView({
           <div className="space-y-2">
             <WeekList
               items={thisWeekItems}
-              onMoveNext={moveToNextWeek}
               onUpdate={onUpdate}
               onRemove={onRemove}
               onMarkPaid={onMarkPaid}
@@ -183,13 +178,11 @@ export function WeekView({
 
 function WeekList({
   items,
-  onMoveNext,
   onUpdate,
   onRemove,
   onMarkPaid,
 }: {
   items: PlanItem[];
-  onMoveNext: (id: string) => void;
   onUpdate: (id: string, patch: Partial<PlanItem>) => void;
   onRemove: (id: string) => void;
   onMarkPaid: (p: PlanItem) => void;
@@ -217,15 +210,6 @@ function WeekList({
                   title={!p.targetDate ? "Specify a day first" : "Mark as paid"}
                 >
                   Mark paid
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 hover:bg-amber-50 cursor-pointer"
-                  onClick={() => onMoveNext(p.id)}
-                  title="Move to next week"
-                >
-                  <ChevronRight className="h-3 w-3" />
                 </Button>
                 <Button
                   size="sm"
