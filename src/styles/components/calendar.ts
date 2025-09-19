@@ -7,6 +7,9 @@ export const calendarStyles = {
   // Today highlight
   todayHighlight: 'ring-2 ring-amber-400 ring-offset-1',
 
+  // Plan animation glow
+  planGlow: 'animate-plan-glow',
+
   // Day cell torn edge
   dayTornEdge: `absolute inset-x-0 -top-1 h-3 ${paperTheme.effects.tornEdge}`,
 

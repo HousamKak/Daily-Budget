@@ -12,6 +12,7 @@ interface CalendarProps {
   budget: number;
   expenses: Expense[];
   plans: PlanItem[];
+  animatedPlanDates?: Set<string>;
   onDayClick: (date: string) => void;
   onShowQuote: () => void;
   onRemoveExpense: (id: string) => void;
@@ -26,6 +27,7 @@ export function Calendar({
   budget,
   expenses,
   plans,
+  animatedPlanDates,
   onDayClick,
   onShowQuote,
   onRemoveExpense,
@@ -85,17 +87,22 @@ export function Calendar({
         {blanks.map((_, i) => (
           <div key={`blank-${i}`} />
         ))}
-        {days.map((d) => (
+        {days.map((d) => {
+          const dayDate = `${monthKey}-${pad2(d)}`;
+          const isAnimated = animatedPlanDates?.has(dayDate) ?? false;
+
+          return (
           <HoverCard key={d} openDelay={200} closeDelay={200}>
             <HoverCardTrigger asChild>
               <button
                 className={cn(
                   calendarStyles.dayCell,
-                  conditional(ymd(today) === `${monthKey}-${pad2(d)}`, calendarStyles.todayHighlight)
+                  conditional(ymd(today) === dayDate, calendarStyles.todayHighlight),
+                  conditional(isAnimated, calendarStyles.planGlow)
                 )}
                 onClick={(e) => {
                   e.preventDefault();
-                  onDayClick(`${monthKey}-${pad2(d)}`);
+                  onDayClick(dayDate);
                 }}
               >
                 {/* torn paper top edge */}
@@ -108,7 +115,7 @@ export function Calendar({
                   </div>
 
                   {/* Today sticker */}
-                  {ymd(today) === `${monthKey}-${pad2(d)}` && (
+                  {ymd(today) === dayDate && (
                     <div
                       className={calendarStyles.todaySticker}
                       onClick={(e) => {
@@ -245,7 +252,8 @@ export function Calendar({
               </div>
             </HoverCardContent>
           </HoverCard>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
