@@ -37,24 +37,8 @@ export function DraftView({
   function addDraftItem() {
     if (!newItemNote.trim()) return;
 
-    // If we have amount, add directly to planner
+    // Always add to draft - items stay in draft until user clicks "Plan"
     const amount = quickAmount ? Number(quickAmount) : undefined;
-    if (amount && amount > 0) {
-      onAddToPlan({
-        note: newItemNote.trim(),
-        amount: amount,
-        category: quickCategory || "misc",
-        targetDate: quickDate || undefined,
-      });
-      // Clear form
-      setNewItemNote("");
-      setQuickAmount("");
-      setQuickCategory("");
-      setQuickDate("");
-      return;
-    }
-
-    // Otherwise add to draft
     onAddDraftItem({
       note: newItemNote.trim(),
       amount: amount,
