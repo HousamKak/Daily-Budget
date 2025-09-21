@@ -71,7 +71,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           resetForm()
         }
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setIsLoading(false)
@@ -95,7 +95,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
       } else {
         setMessage('Check your email for a password reset link!')
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setIsLoading(false)

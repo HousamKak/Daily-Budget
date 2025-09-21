@@ -67,19 +67,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string) => {
-    if (!supabase) {
-      return { error: new Error('Supabase not available') }
-    }
-
-    setLoading(true)
-    const result = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    setLoading(false)
-    return result
+  if (!supabase) {
+    return { error: new Error('Supabase not available') }
   }
 
+  const emailRedirectTo =
+    typeof window !== 'undefined'
+      ? (() => {
+          const basePath = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
+          const confirmationPath = `${basePath}/auth/confirm`
+          return `${window.location.origin}${confirmationPath}`
+        })()
+      : undefined
+
+  setLoading(true)
+  
+  const signUpParams: {
+    email: string
+    password: string
+    options?: { emailRedirectTo: string }
+  } = {
+    email,
+    password,
+  }
+
+  if (emailRedirectTo) {
+    signUpParams.options = { emailRedirectTo }
+  }
+
+  const result = await supabase.auth.signUp(signUpParams)
+  setLoading(false)
+  return result
+}
   const signOut = async () => {
     if (!supabase) return
 
