@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useAuth } from '@/contexts/AuthContext'
+import { EmailVerificationWaiting } from './EmailVerification'
 import { dialogStyles, cn } from '@/styles'
 
 export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -14,6 +15,8 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
+  const [signupEmail, setSignupEmail] = useState('')
 
   const { signIn, signUp, resetPassword } = useAuth()
 
@@ -60,7 +63,8 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
         if (error) {
           setError(error.message)
         } else {
-          setMessage('📧 Confirmation email sent! Check your inbox and click the link to activate your account. Then return here to sign in.')
+          setSignupEmail(email)
+          setShowEmailVerification(true)
         }
       } else {
         const { error } = await signIn(email, password)
@@ -109,6 +113,8 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
     setError('')
     setMessage('')
     setIsSignUp(false)
+    setShowEmailVerification(false)
+    setSignupEmail('')
   }
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -118,9 +124,23 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
     onOpenChange(newOpen)
   }
 
+  const handleBackToSignIn = () => {
+    setShowEmailVerification(false)
+    setIsSignUp(false)
+    setSignupEmail('')
+    setError('')
+    setMessage('')
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px] mx-2 sm:mx-auto">
+        {showEmailVerification ? (
+          <EmailVerificationWaiting
+            email={signupEmail}
+            onBackToSignIn={handleBackToSignIn}
+          />
+        ) : (
         <div className={dialogStyles.paperDialog}>
           {/* Paper texture overlay */}
           <div className={dialogStyles.paperTexture}></div>
@@ -252,6 +272,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           </div>
         </div>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   )

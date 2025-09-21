@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import PaperBudget from './components/PaperBudget'
 import Analytics from './components/Analytics'
+import { AuthCallback } from './components/AuthCallback'
 import { NavigationPanel } from './components/NavigationPanel'
 import { paperTheme } from './styles'
 
@@ -29,10 +30,17 @@ function App() {
             </div>
           </div>
 
-          <NavigationPanel />
           <Routes>
-            <Route path="/" element={<PaperBudget />} />
-            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/*" element={
+              <>
+                <NavigationPanel />
+                <Routes>
+                  <Route path="/" element={<PaperBudget />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                </Routes>
+              </>
+            } />
           </Routes>
         </div>
       </Router>

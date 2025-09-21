@@ -72,9 +72,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setLoading(true)
+
+    // Get the current base URL for the redirect
+    const baseUrl = window.location.origin
+    const basePath = import.meta.env.MODE === 'production' ? '/Daily-Budget' : ''
+    const redirectTo = `${baseUrl}${basePath}/auth/callback`
+
     const result = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: redirectTo
+      }
     })
     setLoading(false)
     return result
