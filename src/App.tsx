@@ -4,6 +4,7 @@ import PaperBudget from './components/PaperBudget'
 import Analytics from './components/Analytics'
 import { NavigationPanel } from './components/NavigationPanel'
 import { EmailConfirmation } from './components/EmailConfirmation'
+import { EmailVerificationWaiting } from './components/EmailVerificationWaiting'
 import { paperTheme } from './styles'
 
 // Get the base path from Vite config
@@ -35,6 +36,7 @@ function App() {
             <Route path="/" element={<PaperBudget />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/auth/confirm" element={<EmailConfirmation />} />
+            <Route path="/auth/verify-email" element={<EmailVerificationWaiting />} />
           </Routes>
         </div>
       </Router>

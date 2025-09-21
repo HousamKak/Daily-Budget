@@ -18,6 +18,7 @@ export function EmailConfirmation() {
   const navigate = useNavigate()
   const [status, setStatus] = useState<ConfirmationStatus>('verifying')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState(5)
 
   const hasAuthParams = useMemo(() => {
     const hashParams = new URLSearchParams(location.hash.replace('#', ''))
@@ -47,9 +48,20 @@ export function EmailConfirmation() {
         }
 
         setStatus('success')
-        timeout = setTimeout(() => {
-          navigate('/', { replace: true })
-        }, 2000)
+
+        // Start countdown
+        let count = 5
+        setCountdown(count)
+
+        const countdownInterval = setInterval(() => {
+          count -= 1
+          setCountdown(count)
+
+          if (count <= 0) {
+            clearInterval(countdownInterval)
+            navigate('/', { replace: true })
+          }
+        }, 1000)
       } catch (err) {
         console.error('Email verification error:', err)
         setErrorMessage(err instanceof Error ? err.message : 'Unknown error occurred during verification.')
@@ -84,6 +96,11 @@ export function EmailConfirmation() {
 
             <div className="space-y-3">
               <p className={`text-base sm:text-lg ${paperTheme.colors.text.secondary}`}>{messages[status]}</p>
+              {status === 'success' && (
+                <p className={`text-sm ${paperTheme.colors.text.muted}`}>
+                  Redirecting to your budget in {countdown} second{countdown !== 1 ? 's' : ''}...
+                </p>
+              )}
               {status === 'error' && errorMessage && (
                 <p className={`text-sm ${paperTheme.colors.text.muted}`}>Details: {errorMessage}</p>
               )}

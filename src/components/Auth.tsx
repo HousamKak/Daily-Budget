@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,6 +15,7 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const navigate = useNavigate()
 
   const { signIn, signUp, resetPassword } = useAuth()
 
@@ -60,7 +62,10 @@ export function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange
         if (error) {
           setError(error.message)
         } else {
-          setMessage('📧 Confirmation email sent! Check your inbox and click the link to activate your account. Then return here to sign in.')
+          // Close dialog and redirect to verification waiting page
+          onOpenChange(false)
+          resetForm()
+          navigate(`/auth/verify-email?email=${encodeURIComponent(email)}`)
         }
       } else {
         const { error } = await signIn(email, password)
