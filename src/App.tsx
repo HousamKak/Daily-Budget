@@ -8,7 +8,7 @@ import { EmailVerificationWaiting } from './components/EmailVerificationWaiting'
 import { paperTheme } from './styles'
 
 // Get the base path from Vite config
-const basename = import.meta.env.MODE === 'production' ? '/Daily-Budget' : ''
+const basename = ''
 
 function App() {
   return (
