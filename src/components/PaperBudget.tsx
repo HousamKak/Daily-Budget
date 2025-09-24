@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { dataService, type Expense, type PlanItem } from "@/lib/data-service";
-import { AuthButton } from "@/components/Auth";
+import { AuthButton, AuthDialog } from "@/components/Auth";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
@@ -46,6 +46,7 @@ export default function PaperBudget() {
   // Mobile: bottom tabs to switch between calendar/planner
   const [activeTab, setActiveTab] = useState<'calendar' | 'planner'>('calendar');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   // Plan animation state - tracks which dates should show animation (supports multiple simultaneous)
   const [animatedPlanDates, setAnimatedPlanDates] = useState<Set<string>>(new Set());
 
@@ -237,7 +238,7 @@ export default function PaperBudget() {
       <style dangerouslySetInnerHTML={{ __html: datePickerStyles }} />
       {/* Auth notification sticker (mobile width tweak) */}
       {supabase && !user && (
-        <div className={layoutStyles.notifications.authSticker}>
+        <div className={`${layoutStyles.notifications.authSticker} animate-banner-oscillate cursor-pointer`} onClick={() => setShowAuthDialog(true)}>
           <div className={layoutStyles.notifications.authStickerWrapper}>
             {/* Paper texture overlay */}
             <div className={layoutStyles.notifications.authStickerTexture}></div>
@@ -491,6 +492,12 @@ export default function PaperBudget() {
         open={showQuoteModal}
         onOpenChange={setShowQuoteModal}
         quote={getRandomQuote()}
+      />
+
+      {/* Auth Dialog */}
+      <AuthDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
       />
     </div>
   );

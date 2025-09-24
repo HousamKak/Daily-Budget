@@ -408,6 +408,41 @@
     animation: plan-glow 2.5s ease-out;
   }
 
+  /* Banner bell ring animation - rapid back and forth like a ringing bell */
+  @keyframes banner-bell-ring {
+    0%, 100% {
+      transform: rotate(0deg);
+    }
+    10% {
+      transform: rotate(10deg);
+    }
+    20% {
+      transform: rotate(-8deg);
+    }
+    30% {
+      transform: rotate(6deg);
+    }
+    40% {
+      transform: rotate(-4deg);
+    }
+    50% {
+      transform: rotate(2deg);
+    }
+    60% {
+      transform: rotate(-1deg);
+    }
+    70% {
+      transform: rotate(0.5deg);
+    }
+    80%, 90% {
+      transform: rotate(0deg);
+    }
+  }
+
+  .animate-banner-oscillate {
+    animation: banner-bell-ring 2s ease-out infinite;
+  }
+
   /* Better rendering on small screens */
   body {
     -webkit-font-smoothing: antialiased;
