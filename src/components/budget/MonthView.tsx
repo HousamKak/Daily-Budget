@@ -181,16 +181,14 @@ export function MonthView({
                               )}
                             </div>
                             <div className="flex items-center gap-1">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 px-2 text-xs cursor-pointer"
+                              <button
+                                className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors cursor-pointer handwriting h-6"
                                 onClick={() => onMarkPaid(item)}
                                 disabled={!item.targetDate}
                                 title={!item.targetDate ? "Specify a day first" : "Mark as paid"}
                               >
-                                Mark paid
-                              </Button>
+                                ✓ Paid
+                              </button>
                               <Button
                                 size="sm"
                                 variant="ghost"

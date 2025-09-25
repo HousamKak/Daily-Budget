@@ -207,9 +207,13 @@ export function Calendar({
                         {p.note && <div className="text-xs text-stone-500 truncate">{p.note}</div>}
                       </div>
                       <div className="flex gap-1">
-                        <Button size="sm" variant="outline" className="h-7 cursor-pointer" onClick={() => onMarkPlanPaid(p)}>
-                          Mark paid
-                        </Button>
+                        <button
+                          className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors cursor-pointer handwriting h-7"
+                          onClick={() => onMarkPlanPaid(p)}
+                          title="Mark as paid"
+                        >
+                          ✓ Paid
+                        </button>
                         <Button
                           size="icon"
                           variant="ghost"

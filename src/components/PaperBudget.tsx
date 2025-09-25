@@ -379,6 +379,9 @@ export default function PaperBudget() {
               onSubmitPlan={submitPlan}
               dayExpenses={expenses.filter(e => e.date === formDate)}
               dayPlans={plans.filter(p => p.targetDate === formDate)}
+              onMarkPlanPaid={markPlanPaid}
+              onRemovePlan={removePlan}
+              onRemoveExpense={removeExpense}
             />
 
             <AuthButton />

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "./Icons";
 import { CATEGORIES } from "./constants";
 import { dialogStyles, cn } from "@/styles";
+import { type PlanItem } from "@/lib/data-service";
 
 type DialogMode = 'expense' | 'plan';
 
@@ -24,7 +25,10 @@ interface ExpenseDialogProps {
   onSubmit: () => void;
   onSubmitPlan?: (planData: { date: string; amount: number; category: string; note: string }) => void;
   dayExpenses?: Array<{id: string, amount: number, category?: string, note?: string}>;
-  dayPlans?: Array<{id: string, amount: number, category?: string, note?: string}>;
+  dayPlans?: PlanItem[];
+  onMarkPlanPaid?: (plan: PlanItem) => void;
+  onRemovePlan?: (planId: string) => void;
+  onRemoveExpense?: (expenseId: string) => void;
 }
 
 export function ExpenseDialog({
@@ -41,7 +45,10 @@ export function ExpenseDialog({
   onSubmit,
   onSubmitPlan,
   dayExpenses = [],
-  dayPlans = []
+  dayPlans = [],
+  onMarkPlanPaid,
+  onRemovePlan,
+  onRemoveExpense
 }: ExpenseDialogProps) {
   const [mode, setMode] = useState<DialogMode>('expense');
   const [bookMode, setBookMode] = useState(false);
@@ -257,7 +264,7 @@ export function ExpenseDialog({
                   <Button
                     variant="outline"
                     onClick={openBook}
-                    className="handwriting text-amber-700 border-amber-300 hover:bg-amber-50"
+                    className="handwriting text-amber-700 border-amber-300 hover:bg-amber-50 cursor-pointer"
                   >
                     📖 Open Book
                   </Button>
@@ -452,22 +459,37 @@ export function ExpenseDialog({
                               💸 Today's Expenses
                             </h3>
 
-                            <div className="space-y-4">
+                            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 book-scroll book-scroll-red">
                               {dayExpenses && dayExpenses.length > 0 ? (
                                 dayExpenses.map((expense, index) => (
                                   <div key={expense.id} className="relative">
                                     {/* Handwritten note style */}
                                     <div className="bg-white/80 p-3 rounded-sm shadow-sm transform rotate-1 hover:rotate-0 transition-transform duration-200"
                                          style={{transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (0.5 + Math.random() * 0.5)}deg)`}}>
-                                      <div className="handwriting text-red-600 text-base leading-relaxed">
-                                        <span className="font-bold">${expense.amount.toFixed(2)}</span>
-                                        {expense.category && (
-                                          <span className="text-sm opacity-75"> • {expense.category}</span>
+                                      <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                          <div className="handwriting text-red-600 text-base leading-relaxed">
+                                            <span className="font-bold">${expense.amount.toFixed(2)}</span>
+                                            {expense.category && (
+                                              <span className="text-sm opacity-75"> • {expense.category}</span>
+                                            )}
+                                          </div>
+                                          {expense.note && (
+                                            <p className="handwriting text-stone-600 text-sm mt-1 leading-relaxed">{expense.note}</p>
+                                          )}
+                                        </div>
+                                        {onRemoveExpense && (
+                                          <div className="flex gap-1 ml-2 flex-shrink-0">
+                                            <button
+                                              onClick={() => onRemoveExpense(expense.id)}
+                                              className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors cursor-pointer handwriting"
+                                              title="Delete expense"
+                                            >
+                                              ✕
+                                            </button>
+                                          </div>
                                         )}
                                       </div>
-                                      {expense.note && (
-                                        <p className="handwriting text-stone-600 text-sm mt-1 leading-relaxed">{expense.note}</p>
-                                      )}
                                     </div>
                                   </div>
                                 ))
@@ -494,22 +516,48 @@ export function ExpenseDialog({
                               📋 Today's Plans
                             </h3>
 
-                            <div className="space-y-4">
+                            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 book-scroll book-scroll-blue">
                               {dayPlans && dayPlans.length > 0 ? (
                                 dayPlans.map((plan, index) => (
                                   <div key={plan.id} className="relative">
                                     {/* Handwritten note style */}
                                     <div className="bg-white/80 p-3 rounded-sm shadow-sm transform hover:rotate-0 transition-transform duration-200"
                                          style={{transform: `rotate(${(index % 2 === 0 ? -1 : 1) * (0.5 + Math.random() * 0.5)}deg)`}}>
-                                      <div className="handwriting text-blue-600 text-base leading-relaxed">
-                                        <span className="font-bold">${plan.amount.toFixed(2)}</span>
-                                        {plan.category && (
-                                          <span className="text-sm opacity-75"> • {plan.category}</span>
+                                      <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                          <div className="handwriting text-blue-600 text-base leading-relaxed">
+                                            <span className="font-bold">${plan.amount.toFixed(2)}</span>
+                                            {plan.category && (
+                                              <span className="text-sm opacity-75"> • {plan.category}</span>
+                                            )}
+                                          </div>
+                                          {plan.note && (
+                                            <p className="handwriting text-stone-600 text-sm mt-1 leading-relaxed">{plan.note}</p>
+                                          )}
+                                        </div>
+                                        {(onMarkPlanPaid || onRemovePlan) && (
+                                          <div className="flex gap-1 ml-2 flex-shrink-0">
+                                            {onMarkPlanPaid && (
+                                              <button
+                                                onClick={() => onMarkPlanPaid(plan)}
+                                                className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors cursor-pointer handwriting"
+                                                title="Mark as paid"
+                                              >
+                                                ✓ Paid
+                                              </button>
+                                            )}
+                                            {onRemovePlan && (
+                                              <button
+                                                onClick={() => onRemovePlan(plan.id)}
+                                                className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors cursor-pointer handwriting"
+                                                title="Delete plan"
+                                              >
+                                                ✕
+                                              </button>
+                                            )}
+                                          </div>
                                         )}
                                       </div>
-                                      {plan.note && (
-                                        <p className="handwriting text-stone-600 text-sm mt-1 leading-relaxed">{plan.note}</p>
-                                      )}
                                     </div>
                                   </div>
                                 ))
@@ -533,7 +581,7 @@ export function ExpenseDialog({
                       size="sm"
                       onClick={() => flipPage(0)}
                       disabled={currentPage === 0 || isFlipping}
-                      className={cn("handwriting text-xs", currentPage === 0 && "bg-amber-100 border-amber-300")}
+                      className={cn("handwriting text-xs cursor-pointer", currentPage === 0 && "bg-amber-100 border-amber-300")}
                     >
                       📝 Add Entry
                     </Button>
@@ -543,7 +591,7 @@ export function ExpenseDialog({
                       size="sm"
                       onClick={() => flipPage(1)}
                       disabled={currentPage === 1 || isFlipping}
-                      className={cn("handwriting text-xs", currentPage === 1 && "bg-amber-100 border-amber-300")}
+                      className={cn("handwriting text-xs cursor-pointer", currentPage === 1 && "bg-amber-100 border-amber-300")}
                     >
                       📖 View Entries
                     </Button>
@@ -555,7 +603,7 @@ export function ExpenseDialog({
                   <Button
                     variant="outline"
                     onClick={closeBook}
-                    className="handwriting text-stone-600 border-stone-300 hover:bg-stone-50"
+                    className="handwriting text-stone-600 border-stone-300 hover:bg-stone-50 cursor-pointer"
                   >
                     ← Close Book
                   </Button>
