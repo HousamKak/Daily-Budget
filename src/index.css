@@ -430,6 +430,24 @@
     animation: expense-glow 2.5s ease-out;
   }
 
+  /* Handwriting font utility */
+  .handwriting {
+    font-family: "Patrick Hand", "Comic Sans MS", cursive;
+  }
+
+  /* Page flip animation */
+  .rotateY-0 {
+    transform: rotateY(0deg);
+  }
+
+  .rotateY-90 {
+    transform: rotateY(90deg);
+  }
+
+  .hover\\:scale-102:hover {
+    transform: scale(1.02);
+  }
+
   /* Banner bell ring animation - rapid back and forth like a ringing bell */
   @keyframes banner-bell-ring {
     0%, 100% {

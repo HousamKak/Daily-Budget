@@ -237,6 +237,28 @@ export default function PaperBudget() {
     setOpen(false);
   }
 
+  function submitPlan(planData: { date: string; amount: number; category: string; note: string }) {
+    // Parse the date to get week information
+    const targetDate = new Date(planData.date);
+    const weekIdx = weekIndexOf(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+
+    addPlan({
+      monthKey: key,
+      weekIndex: weekIdx,
+      targetDate: planData.date,
+      amount: planData.amount,
+      category: planData.category,
+      note: planData.note
+    });
+
+    // Trigger blue animation on the target date
+    handlePlanAnimation(planData.date);
+
+    setAmount("");
+    setNote("");
+    setOpen(false);
+  }
+
   // nice month label
   const monthLabel = new Date(year, month, 1).toLocaleString(undefined, {
     month: "long",
@@ -354,6 +376,9 @@ export default function PaperBudget() {
               note={note}
               onNoteChange={setNote}
               onSubmit={submitExpense}
+              onSubmitPlan={submitPlan}
+              dayExpenses={expenses.filter(e => e.date === formDate)}
+              dayPlans={plans.filter(p => p.targetDate === formDate)}
             />
 
             <AuthButton />
