@@ -49,6 +49,8 @@ export default function PaperBudget() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   // Plan animation state - tracks which dates should show animation (supports multiple simultaneous)
   const [animatedPlanDates, setAnimatedPlanDates] = useState<Set<string>>(new Set());
+  // Expense animation state - tracks which dates should show red animation (supports multiple simultaneous)
+  const [animatedExpenseDates, setAnimatedExpenseDates] = useState<Set<string>>(new Set());
 
   // Debounce the budget input to avoid excessive API calls
   const debouncedBudgetInput = useDebounce(budgetInput, 800);
@@ -100,6 +102,7 @@ export default function PaperBudget() {
   const totalSpent = useMemo(() => expenses.reduce((s, e) => s + e.amount, 0), [expenses]);
   const totalPlanned = useMemo(() => plans.reduce((s, p) => s + p.amount, 0), [plans]);
   const leftNow = Math.max(0, budget - totalSpent);
+  const leftAfterPlanned = budget - totalSpent - totalPlanned;
 
   // nav
   function gotoPrev() {
@@ -196,6 +199,21 @@ export default function PaperBudget() {
     }, 2500);
   }
 
+  // Handle expense animation - shows red glow on calendar day (supports multiple simultaneous)
+  function handleExpenseAnimation(targetDate: string) {
+    // Add the date to the animated set
+    setAnimatedExpenseDates(prev => new Set([...prev, targetDate]));
+
+    // Remove this specific date after animation completes (2.5s)
+    setTimeout(() => {
+      setAnimatedExpenseDates(prev => {
+        const next = new Set(prev);
+        next.delete(targetDate);
+        return next;
+      });
+    }, 2500);
+  }
+
   // add-expense dialog state (compact)
   const [open, setOpen] = useState(false);
   const [formDate, setFormDate] = useState<string>(ymd(today));
@@ -210,6 +228,10 @@ export default function PaperBudget() {
     const a = Number(amount);
     if (!formDate || isNaN(a) || a <= 0) return;
     addExpense({ id: makeId(), date: formDate, amount: Number(a.toFixed(2)), category, note });
+
+    // Trigger red animation on the target date
+    handleExpenseAnimation(formDate);
+
     setAmount("");
     setNote("");
     setOpen(false);
@@ -390,20 +412,43 @@ export default function PaperBudget() {
           </DialogContent>
         </Dialog>
 
-        {/* quick summary */}
-        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
-          <SummaryCard title="Starting cash" value={budget} />
-          <SummaryCard title="Spent so far" value={totalSpent} red />
-          <SummaryCard title="Planned so far" value={totalPlanned} />
-          <SummaryCard title="Left now" value={leftNow} highlight />
-        </div>
       </div>
 
       {/* layout: calendar + planner */}
       <div className={`mx-auto max-w-7xl px-1 sm:px-2 pb-2 lg:pb-12 mobile-content-area lg:flex-1 mobile-tab-${activeTab}`}>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-4 items-start h-full lg:h-auto">
-          {/* Calendar - show on mobile only when calendar tab active, always show on desktop */}
-          <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col lg:max-h-[85vh]" data-mobile-view="calendar">
+          {/* Left column: Summary + Calendar */}
+          <div className="space-y-4">
+            {/* quick summary - spans above calendar only */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+              <SummaryCard
+                title="Starting cash"
+                value={budget}
+                titleTooltip="Your monthly budget amount. This is the total money you have allocated for this month."
+              />
+              <SummaryCard
+                title="Spent so far"
+                value={totalSpent}
+                red
+                leftAmount={leftNow}
+                leftLabel="left now"
+                titleTooltip="Total amount you have already spent this month. Calculated by summing all your recorded expenses."
+                leftLabelTooltip={`Money remaining right now. Calculated as: Starting cash - Spent so far = $${budget.toFixed(2)} - $${totalSpent.toFixed(2)} = $${leftNow.toFixed(2)}`}
+              />
+              <SummaryCard
+                title="Planned so far"
+                value={totalPlanned}
+                blue
+                leftAmount={leftAfterPlanned}
+                leftLabel="left after"
+                leftAmountRed={leftAfterPlanned < 0}
+                titleTooltip="Total amount you have planned to spend but haven't spent yet. This includes all your planned items that are not yet marked as paid."
+                leftLabelTooltip={`Money that will remain after all planned expenses. ${leftAfterPlanned < 0 ? 'Negative means you have overplanned beyond your remaining budget.' : ''} Calculated as: Starting cash - Spent so far - Planned so far = $${budget.toFixed(2)} - $${totalSpent.toFixed(2)} - $${totalPlanned.toFixed(2)} = $${leftAfterPlanned.toFixed(2)}`}
+              />
+            </div>
+
+            {/* Calendar - show on mobile only when calendar tab active, always show on desktop */}
+            <div className="mobile-calendar-area lg:h-auto lg:flex lg:flex-col lg:max-h-[85vh]" data-mobile-view="calendar">
             <Calendar
               year={year}
               month={month}
@@ -412,6 +457,7 @@ export default function PaperBudget() {
               expenses={expenses}
               plans={plans}
               animatedPlanDates={animatedPlanDates}
+              animatedExpenseDates={animatedExpenseDates}
               onDayClick={(dateString) => {
                 setFormDate(dateString);
                 setOpen(true);
@@ -421,10 +467,16 @@ export default function PaperBudget() {
               onRemoveExpense={removeExpense}
               onShowQuote={() => setShowQuoteModal(true)}
             />
+            </div>
           </div>
 
-          {/* Planner Panel (on mobile: toggled by bottom tabs) */}
-          <div className="mobile-planner-area lg:mt-0" data-mobile-view="planner">
+          {/* Right column: Empty space above + Planner Panel */}
+          <div className="space-y-4">
+            {/* Empty space to match the height of summary cards */}
+            <div className="hidden lg:block h-[100px]"></div>
+
+            {/* Planner Panel (on mobile: toggled by bottom tabs) */}
+            <div className="mobile-planner-area lg:mt-0" data-mobile-view="planner">
             <PlannerPanel
               year={year}
               month={month}
@@ -440,6 +492,7 @@ export default function PaperBudget() {
               onMarkPaid={markPlanPaid}
               onPlanAnimation={handlePlanAnimation}
             />
+            </div>
           </div>
         </div>
 

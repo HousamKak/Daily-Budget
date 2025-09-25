@@ -2,13 +2,14 @@ import { paperTheme } from '../themes/paper-theme';
 
 export const summaryCardStyles = {
   // Base card
-  base: `${paperTheme.radius.lg} border-2 ${paperTheme.effects.shadow.sm} px-3 py-2 bg-white/80`,
+  base: `${paperTheme.radius.lg} border-2 ${paperTheme.effects.shadow.sm} px-2 py-1.5 bg-white/80`,
 
   // Variants
   variants: {
     default: paperTheme.colors.borders.amber,
     highlight: 'border-emerald-400 bg-emerald-50/80',
     red: 'border-red-300 bg-red-50/80',
+    blue: 'border-blue-300 bg-blue-50/80',
   },
 
   // Text styles

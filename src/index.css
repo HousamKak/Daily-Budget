@@ -408,6 +408,28 @@
     animation: plan-glow 2.5s ease-out;
   }
 
+  @keyframes expense-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+    }
+    25% {
+      box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.3), 0 0 20px rgba(220, 38, 38, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 0 12px rgba(220, 38, 38, 0.25), 0 0 30px rgba(220, 38, 38, 0.15);
+    }
+    75% {
+      box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.2), 0 0 20px rgba(220, 38, 38, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    }
+  }
+
+  .animate-expense-glow {
+    animation: expense-glow 2.5s ease-out;
+  }
+
   /* Banner bell ring animation - rapid back and forth like a ringing bell */
   @keyframes banner-bell-ring {
     0%, 100% {

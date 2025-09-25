@@ -10,6 +10,9 @@ export const calendarStyles = {
   // Plan animation glow
   planGlow: 'animate-plan-glow',
 
+  // Expense animation glow
+  expenseGlow: 'animate-expense-glow',
+
   // Day cell torn edge
   dayTornEdge: `absolute inset-x-0 -top-1 h-3 ${paperTheme.effects.tornEdge}`,
 

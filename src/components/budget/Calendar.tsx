@@ -13,6 +13,7 @@ interface CalendarProps {
   expenses: Expense[];
   plans: PlanItem[];
   animatedPlanDates?: Set<string>;
+  animatedExpenseDates?: Set<string>;
   onDayClick: (date: string) => void;
   onShowQuote: () => void;
   onRemoveExpense: (id: string) => void;
@@ -28,6 +29,7 @@ export function Calendar({
   expenses,
   plans,
   animatedPlanDates,
+  animatedExpenseDates,
   onDayClick,
   onShowQuote,
   onRemoveExpense,
@@ -89,7 +91,8 @@ export function Calendar({
         ))}
         {days.map((d) => {
           const dayDate = `${monthKey}-${pad2(d)}`;
-          const isAnimated = animatedPlanDates?.has(dayDate) ?? false;
+          const isPlanAnimated = animatedPlanDates?.has(dayDate) ?? false;
+          const isExpenseAnimated = animatedExpenseDates?.has(dayDate) ?? false;
 
           return (
           <HoverCard key={d} openDelay={200} closeDelay={200}>
@@ -98,7 +101,8 @@ export function Calendar({
                 className={cn(
                   calendarStyles.dayCell,
                   conditional(ymd(today) === dayDate, calendarStyles.todayHighlight),
-                  conditional(isAnimated, calendarStyles.planGlow)
+                  conditional(isPlanAnimated, calendarStyles.planGlow),
+                  conditional(isExpenseAnimated, calendarStyles.expenseGlow)
                 )}
                 onClick={(e) => {
                   e.preventDefault();

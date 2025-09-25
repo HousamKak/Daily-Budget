@@ -69,3 +69,11 @@ export const CheckCircle = ({ className }: { className?: string }) => (
     <polyline points="22 4 12 14.01 9 11.01" />
   </IconBase>
 );
+
+export const Info = ({ className }: { className?: string }) => (
+  <IconBase className={className}>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12" y2="8" />
+  </IconBase>
+);
