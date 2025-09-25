@@ -7,7 +7,7 @@ import { paperTheme } from "@/styles";
  */
 export default function SavingsGoals() {
   return (
-    <div className={`min-h-screen w-full ${paperTheme.colors.background.app} flex flex-col items-center justify-center relative overflow-hidden`}>
+    <div className={`min-h-screen w-full bg-[${paperTheme.colors.background.paper}] flex flex-col items-center justify-center relative overflow-hidden`}>
       {/* Background paper texture */}
       <div className={`absolute inset-0 opacity-5 ${paperTheme.effects.paperTexture} pointer-events-none`}></div>
 
@@ -20,15 +20,15 @@ export default function SavingsGoals() {
       </div>
 
       <div className="absolute bottom-32 right-16 transform rotate-45">
-        <div className={`w-20 h-20 ${paperTheme.colors.background.cardGradient} ${paperTheme.colors.borders.amber} ${paperTheme.radius.full} ${paperTheme.effects.shadow.md}`}>
-          <div className={`absolute inset-0 opacity-10 ${paperTheme.effects.paperTexture} ${paperTheme.radius.full}`}></div>
+        <div className={`w-20 h-20 ${paperTheme.colors.background.cardGradient} ${paperTheme.colors.borders.amber} rounded-full ${paperTheme.effects.shadow.md}`}>
+          <div className={`absolute inset-0 opacity-10 ${paperTheme.effects.paperTexture} rounded-full`}></div>
         </div>
       </div>
 
       {/* Main content card */}
-      <div className={`relative ${paperTheme.colors.background.cardGradient} ${paperTheme.colors.borders.paper} ${paperTheme.radius.xl} p-12 ${paperTheme.effects.shadow.lg} overflow-hidden max-w-2xl mx-4 text-center transform hover:scale-105 transition-transform duration-300`}>
+      <div className={`relative ${paperTheme.colors.background.cardGradient} ${paperTheme.colors.borders.paper} rounded-3xl p-12 ${paperTheme.effects.shadow.lg} overflow-hidden max-w-2xl mx-4 text-center transform hover:scale-105 transition-transform duration-300`}>
         {/* Paper texture overlay */}
-        <div className={`absolute inset-0 opacity-15 ${paperTheme.effects.paperTexture} ${paperTheme.radius.xl} pointer-events-none`}></div>
+        <div className={`absolute inset-0 opacity-15 ${paperTheme.effects.paperTexture} rounded-3xl pointer-events-none`}></div>
 
         {/* Yellow tape at top */}
         <div className={`absolute -top-2 left-1/2 -translate-x-1/2 w-20 h-6 ${paperTheme.effects.yellowTape}`}></div>
@@ -40,13 +40,13 @@ export default function SavingsGoals() {
         <div className="relative z-10">
           {/* Icon cluster */}
           <div className="flex justify-center items-center gap-4 mb-8">
-            <div className={`p-4 ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amber} ${paperTheme.radius.full} ${paperTheme.effects.shadow.sm} transform -rotate-12 animate-bounce`}>
+            <div className={`p-4 ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amber} rounded-full ${paperTheme.effects.shadow.sm} transform -rotate-12 animate-bounce`}>
               <PiggyBank className={`w-8 h-8 ${paperTheme.colors.text.accent}`} />
             </div>
-            <div className={`p-4 ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amber} ${paperTheme.radius.full} ${paperTheme.effects.shadow.sm} transform rotate-12 animate-bounce`} style={{ animationDelay: '0.2s' }}>
+            <div className={`p-4 ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amber} rounded-full ${paperTheme.effects.shadow.sm} transform rotate-12 animate-bounce`} style={{ animationDelay: '0.2s' }}>
               <Target className={`w-8 h-8 ${paperTheme.colors.text.accent}`} />
             </div>
-            <div className={`p-4 ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amber} ${paperTheme.radius.full} ${paperTheme.effects.shadow.sm} transform -rotate-6 animate-bounce`} style={{ animationDelay: '0.4s' }}>
+            <div className={`p-4 ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amber} rounded-full ${paperTheme.effects.shadow.sm} transform -rotate-6 animate-bounce`} style={{ animationDelay: '0.4s' }}>
               <TrendingUp className={`w-8 h-8 ${paperTheme.colors.text.accent}`} />
             </div>
           </div>
@@ -57,8 +57,8 @@ export default function SavingsGoals() {
           </h1>
 
           {/* Coming soon badge */}
-          <div className={`inline-block ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amberStrong} ${paperTheme.radius.full} px-6 py-3 ${paperTheme.effects.shadow.md} mb-6 transform -rotate-2 relative overflow-hidden`}>
-            <div className={`absolute inset-0 opacity-10 ${paperTheme.effects.paperTextureSmall} ${paperTheme.radius.full}`}></div>
+          <div className={`inline-block ${paperTheme.colors.background.white} ${paperTheme.colors.borders.amberStrong} rounded-full px-6 py-3 ${paperTheme.effects.shadow.md} mb-6 transform -rotate-2 relative overflow-hidden`}>
+            <div className={`absolute inset-0 opacity-10 ${paperTheme.effects.paperTextureSmall} rounded-full`}></div>
             <div className={`relative text-lg font-bold ${paperTheme.colors.text.accent} ${paperTheme.fonts.handwriting}`}>
               ✨ Coming Soon! ✨
             </div>
