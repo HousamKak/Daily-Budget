@@ -8,12 +8,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
 // Import our new components
-import { ChevronLeft, ChevronRight, Trash, Wallet, CalendarIcon } from "./budget/Icons";
+import { ChevronLeft, ChevronRight, Trash, Wallet, CalendarIcon, Book } from "./budget/Icons";
 import { SummaryCard } from "./budget/SummaryCard";
 import { ExpenseDialog } from "./budget/ExpenseDialog";
 import { Calendar } from "./budget/Calendar";
 import { PlannerPanel } from "./budget/PlannerPanel";
 import { QuoteModal } from "./budget/QuoteModal";
+import { MonthlyBookDialog } from "./budget/MonthlyBookDialog";
 import { useDebounce } from "./budget/hooks/useDebounce";
 import { monthKey, weekCount, weekIndexOf, ymd, makeId } from "./budget/utils";
 import { datePickerStyles, getRandomQuote } from "./budget/constants";
@@ -221,6 +222,9 @@ export default function PaperBudget() {
   const [category, setCategory] = useState<string>("groceries");
   const [note, setNote] = useState<string>("");
 
+  // monthly book modal state
+  const [monthlyBookOpen, setMonthlyBookOpen] = useState(false);
+
   // clear month confirmation dialog
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
@@ -326,6 +330,15 @@ export default function PaperBudget() {
               <ChevronRight className="h-4 w-4" />
             </Button>
 
+            {/* Monthly book button */}
+            <button
+              onClick={() => setMonthlyBookOpen(true)}
+              className="p-2 rounded-xl bg-amber-100/60 hover:bg-amber-200/80 border border-amber-300/50 cursor-pointer transition-all duration-200 hover:scale-110 shadow-sm h-8 w-8 sm:h-10 sm:w-10"
+              title="Open monthly book"
+            >
+              <Book className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700" />
+            </button>
+
             {/* Clear month button - papery cartoony style */}
             <div className="relative ml-3">
               <Button
@@ -379,6 +392,17 @@ export default function PaperBudget() {
               onSubmitPlan={submitPlan}
               dayExpenses={expenses.filter(e => e.date === formDate)}
               dayPlans={plans.filter(p => p.targetDate === formDate)}
+              onMarkPlanPaid={markPlanPaid}
+              onRemovePlan={removePlan}
+              onRemoveExpense={removeExpense}
+            />
+
+            <MonthlyBookDialog
+              open={monthlyBookOpen}
+              onOpenChange={setMonthlyBookOpen}
+              monthLabel={monthLabel}
+              expenses={expenses}
+              plans={plans}
               onMarkPlanPaid={markPlanPaid}
               onRemovePlan={removePlan}
               onRemoveExpense={removeExpense}
@@ -527,10 +551,7 @@ export default function PaperBudget() {
         {/* Footer tip - raised above taskbar */}
         <div className="mx-auto max-w-7xl px-1 sm:px-2 pb-16 pt-4 hidden sm:block">
           <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3">
-            <div className="text-xs sm:text-sm opacity-80 flex items-center gap-1 text-left">
-              <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span>Tip: click any day to add an expense • hover to see planned + paid items.</span>
-            </div>
+            {/* Removed tip as requested */}
           </div>
         </div>
 

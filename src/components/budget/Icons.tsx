@@ -77,3 +77,12 @@ export const Info = ({ className }: { className?: string }) => (
     <line x1="12" y1="8" x2="12" y2="8" />
   </IconBase>
 );
+
+export const Book = ({ className }: { className?: string }) => (
+  <IconBase className={className}>
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+    <polyline points="6.5,6.5 6.5,7.5" />
+    <polyline points="6.5,10 6.5,11" />
+    <polyline points="6.5,13.5 6.5,14.5" />
+  </IconBase>
+);
