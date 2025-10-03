@@ -34,6 +34,111 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          category: string | null
+          created_at: string | null
+          date: string
+          expense_id: string | null
+          id: string
+          note: string | null
+          transfer_to_account_id: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          category?: string | null
+          created_at?: string | null
+          date: string
+          expense_id?: string | null
+          id?: string
+          note?: string | null
+          transfer_to_account_id?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          category?: string | null
+          created_at?: string | null
+          date?: string
+          expense_id?: string | null
+          id?: string
+          note?: string | null
+          transfer_to_account_id?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_transactions_transfer_to_account_id_fkey"
+            columns: ["transfer_to_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      accounts: {
+        Row: {
+          balance: number
+          color: string | null
+          created_at: string | null
+          currency: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notes: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          color?: string | null
+          created_at?: string | null
+          currency?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notes?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          color?: string | null
+          created_at?: string | null
+          currency?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string

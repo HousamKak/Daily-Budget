@@ -27,17 +27,47 @@ export type DraftItem = {
   date?: string
 }
 
+export type Account = {
+  id: string
+  name: string
+  type: 'checking' | 'savings' | 'credit' | 'investment' | 'cash' | 'asset' | 'property' | 'vehicle' | 'other'
+  balance: number
+  currency: string
+  icon?: string
+  color?: string
+  isActive: boolean
+  notes?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type AccountTransaction = {
+  id: string
+  accountId: string
+  type: 'deposit' | 'withdrawal' | 'transfer' | 'adjustment'
+  amount: number
+  date: string
+  note?: string
+  category?: string
+  expenseId?: string
+  transferToAccountId?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export type Store = {
   budgets: Record<string, number>
   expenses: Record<string, Expense[]>
   plans: Record<string, PlanItem[]>
   drafts: DraftItem[]
+  accounts: Account[]
+  accountTransactions: AccountTransaction[]
 }
 
 // LocalStorage fallback
 const STORAGE_KEY = "paper-budget-cartoon-v1"
 
-const defaultStore: Store = { budgets: {}, expenses: {}, plans: {}, drafts: [] }
+const defaultStore: Store = { budgets: {}, expenses: {}, plans: {}, drafts: [], accounts: [], accountTransactions: [] }
 
 function loadStoreFromLocalStorage(): Store {
   try {
@@ -49,6 +79,8 @@ function loadStoreFromLocalStorage(): Store {
       expenses: parsed.expenses ?? {},
       plans: parsed.plans ?? {},
       drafts: parsed.drafts ?? [],
+      accounts: parsed.accounts ?? [],
+      accountTransactions: parsed.accountTransactions ?? [],
     }
   } catch {
     return { ...defaultStore }
@@ -536,6 +568,271 @@ export class DataService {
 
     this.localStore.drafts = []
     saveStoreToLocalStorage(this.localStore)
+  }
+
+  // Account operations
+  async getAccounts(): Promise<Account[]> {
+    if (this.useSupabase && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: true })
+
+        if (error) throw error
+        return data?.map(row => ({
+          id: row.id,
+          name: row.name,
+          type: row.type as Account['type'],
+          balance: Number(row.balance),
+          currency: row.currency,
+          icon: row.icon || undefined,
+          color: row.color || undefined,
+          isActive: row.is_active ?? true,
+          notes: row.notes || undefined,
+          createdAt: row.created_at || undefined,
+          updatedAt: row.updated_at || undefined,
+        })) || []
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+        return this.localStore.accounts.filter(a => a.isActive)
+      }
+    }
+
+    return this.localStore.accounts.filter(a => a.isActive)
+  }
+
+  async addAccount(account: Omit<Account, 'id' | 'createdAt' | 'updatedAt'>): Promise<Account> {
+    const newAccount: Account = {
+      ...account,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    if (this.useSupabase && supabase) {
+      try {
+        const user = await this.getCurrentUser()
+        if (!user) {
+          console.warn('User not authenticated, falling back to localStorage')
+          this.useSupabase = false
+        } else {
+          const { error } = await supabase
+            .from('accounts')
+            .insert({
+              id: newAccount.id,
+              user_id: user.id,
+              name: newAccount.name,
+              type: newAccount.type,
+              balance: newAccount.balance,
+              currency: newAccount.currency,
+              icon: newAccount.icon,
+              color: newAccount.color,
+              is_active: newAccount.isActive,
+              notes: newAccount.notes,
+            })
+
+          if (error) throw error
+          return newAccount
+        }
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    this.localStore.accounts.push(newAccount)
+    saveStoreToLocalStorage(this.localStore)
+    return newAccount
+  }
+
+  async updateAccount(id: string, updates: Partial<Account>): Promise<void> {
+    if (this.useSupabase && supabase) {
+      try {
+        const dbUpdates: any = {}
+        if (updates.name !== undefined) dbUpdates.name = updates.name
+        if (updates.type !== undefined) dbUpdates.type = updates.type
+        if (updates.balance !== undefined) dbUpdates.balance = updates.balance
+        if (updates.currency !== undefined) dbUpdates.currency = updates.currency
+        if (updates.icon !== undefined) dbUpdates.icon = updates.icon
+        if (updates.color !== undefined) dbUpdates.color = updates.color
+        if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive
+        if (updates.notes !== undefined) dbUpdates.notes = updates.notes
+
+        const { error } = await supabase
+          .from('accounts')
+          .update(dbUpdates)
+          .eq('id', id)
+
+        if (error) throw error
+        return
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    const index = this.localStore.accounts.findIndex(a => a.id === id)
+    if (index !== -1) {
+      this.localStore.accounts[index] = { ...this.localStore.accounts[index], ...updates }
+      saveStoreToLocalStorage(this.localStore)
+    }
+  }
+
+  async deleteAccount(id: string): Promise<void> {
+    if (this.useSupabase && supabase) {
+      try {
+        const { error } = await supabase
+          .from('accounts')
+          .update({ is_active: false })
+          .eq('id', id)
+
+        if (error) throw error
+        return
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    const account = this.localStore.accounts.find(a => a.id === id)
+    if (account) {
+      account.isActive = false
+      saveStoreToLocalStorage(this.localStore)
+    }
+  }
+
+  async getAccountTransactions(accountId?: string): Promise<AccountTransaction[]> {
+    if (this.useSupabase && supabase) {
+      try {
+        let query = supabase
+          .from('account_transactions')
+          .select('*')
+          .order('date', { ascending: false })
+
+        if (accountId) {
+          query = query.eq('account_id', accountId)
+        }
+
+        const { data, error } = await query
+
+        if (error) throw error
+        return data?.map(row => ({
+          id: row.id,
+          accountId: row.account_id,
+          type: row.type as AccountTransaction['type'],
+          amount: Number(row.amount),
+          date: row.date,
+          note: row.note || undefined,
+          category: row.category || undefined,
+          expenseId: row.expense_id || undefined,
+          transferToAccountId: row.transfer_to_account_id || undefined,
+          createdAt: row.created_at || undefined,
+          updatedAt: row.updated_at || undefined,
+        })) || []
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+        return accountId
+          ? this.localStore.accountTransactions.filter(t => t.accountId === accountId)
+          : this.localStore.accountTransactions
+      }
+    }
+
+    return accountId
+      ? this.localStore.accountTransactions.filter(t => t.accountId === accountId)
+      : this.localStore.accountTransactions
+  }
+
+  async addAccountTransaction(transaction: Omit<AccountTransaction, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
+    const newTransaction: AccountTransaction = {
+      ...transaction,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    if (this.useSupabase && supabase) {
+      try {
+        const user = await this.getCurrentUser()
+        if (!user) {
+          console.warn('User not authenticated, falling back to localStorage')
+          this.useSupabase = false
+        } else {
+          const { error } = await supabase
+            .from('account_transactions')
+            .insert({
+              id: newTransaction.id,
+              user_id: user.id,
+              account_id: newTransaction.accountId,
+              type: newTransaction.type,
+              amount: newTransaction.amount,
+              date: newTransaction.date,
+              note: newTransaction.note,
+              category: newTransaction.category,
+              expense_id: newTransaction.expenseId,
+              transfer_to_account_id: newTransaction.transferToAccountId,
+            })
+
+          if (error) throw error
+
+          // Update account balance
+          const balanceChange = transaction.type === 'withdrawal' ? -transaction.amount : transaction.amount
+          await this.updateAccountBalance(transaction.accountId, balanceChange)
+
+          return
+        }
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    this.localStore.accountTransactions.push(newTransaction)
+
+    // Update account balance in localStorage
+    const account = this.localStore.accounts.find(a => a.id === transaction.accountId)
+    if (account) {
+      const balanceChange = transaction.type === 'withdrawal' ? -transaction.amount : transaction.amount
+      account.balance += balanceChange
+    }
+
+    saveStoreToLocalStorage(this.localStore)
+  }
+
+  async updateAccountBalance(accountId: string, change: number): Promise<void> {
+    if (this.useSupabase && supabase) {
+      try {
+        const { data: account, error: fetchError } = await supabase
+          .from('accounts')
+          .select('balance')
+          .eq('id', accountId)
+          .single()
+
+        if (fetchError) throw fetchError
+
+        const newBalance = Number(account.balance) + change
+
+        const { error: updateError } = await supabase
+          .from('accounts')
+          .update({ balance: newBalance })
+          .eq('id', accountId)
+
+        if (updateError) throw updateError
+        return
+      } catch (error) {
+        console.warn('Supabase error, falling back to localStorage:', error)
+        this.useSupabase = false
+      }
+    }
+
+    const account = this.localStore.accounts.find(a => a.id === accountId)
+    if (account) {
+      account.balance += change
+      saveStoreToLocalStorage(this.localStore)
+    }
   }
 }
 
